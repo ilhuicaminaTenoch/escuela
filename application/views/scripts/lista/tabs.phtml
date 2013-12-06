@@ -2,7 +2,11 @@
 $rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
 ?>
 <div id="tabs" class="easyui-tabs" style="width:740px;height:540px">			
-	<div title="Datos escuela" style="padding:10px" id="datosEscuela"></div>
+	<div title="Datos escuela" style="padding:10px" id="datosEscuela">
+		<table id="pg" class="easyui-propertygrid" style="width:600px"
+			data-options="url:'<?php echo $rutaPublica.'propertygrid_data.json'?>',showGroup:true,scrollbarSize:0">
+		</table>		
+	</div>
 	<div title="Lista de control" style="padding:10px" id="listaControl">
 		<table id="dg" class="easyui-datagrid" style="width:710px;height:250px" url="<?php echo $rutaPublica.'lista_alumnos.json';?>">
 			<thead>

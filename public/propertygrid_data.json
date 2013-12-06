@@ -1,0 +1,97 @@
+{
+    "total": 15,
+    "rows": [
+        {
+            "name": "Nombre de la escuela",
+            "value": "Bill Smith",
+            "group": "ID Settings",
+            "editor": "text"
+        },
+        {
+            "name": "Clave",
+            "value": "102487",
+            "group": "ID Settings",
+            "editor": "numberbox"
+        },
+        {
+            "name": "Zona",
+            "value": "A adipiscing augue",
+            "group": "ID Settings",
+            "editor": "text"
+        },
+        {
+            "name": "Sector",
+            "value": "01/02/2012",
+            "group": "ID Settings",
+            "editor": "text"
+        },
+        {
+            "name": "Grado",
+            "value": "1",
+            "group": "ID Grupo",
+            "editor": "text"
+        },
+		{
+            "name": "Grupo",
+            "value": "A",
+            "group": "ID Grupo",
+            "editor": "text"
+        },
+		{
+            "name": "Turno",
+            "value": "Matitino",
+            "group": "ID Grupo",
+            "editor": "text"
+        },
+		{
+            "name": "Calle",
+            "value": "sit penatibus et mattis tincidunt in, auctor lectus nisi auctor",
+            "group": "ID Direccion",
+            "editor": "text"
+        },
+		{
+            "name": "Numero",
+            "value": "10247",
+            "group": "ID Direccion",
+            "editor": "numberbox"
+        },
+		{
+            "name": "Colonia",
+            "value": "enim amet porttitor aliquet",
+            "group": "ID Direccion",
+            "editor": "text"
+        },
+		{
+            "name": "Localidad",
+            "value": "arcu augue non, elementum pid ",
+            "group": "ID Direccion",
+            "editor": "text"
+        },
+		{
+            "name": "Municipio",
+            "value": "arcu augue non, elementum pid ",
+            "group": "ID Direccion",
+            "editor": "text"
+        },
+		{
+            "name": "Entidad",
+            "value": "arcu augue non, elementum pid ",
+            "group": "ID Direccion",
+            "editor": "text"
+        },
+		{
+            "name": "Nombre del Profesor",
+            "value": "arcu augue non, elementum pid ",
+            "group": "ID Profesor",
+            "editor": "text"
+        },
+		{
+            "name": "Nombre del Director",
+            "value": "arcu augue non, elementum pid ",
+            "group": "ID Profesor",
+            "editor": "text"
+        }
+		
+        
+    ]
+}
