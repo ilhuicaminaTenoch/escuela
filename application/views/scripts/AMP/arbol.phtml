@@ -1,0 +1,76 @@
+<?php $rutaImgane = Zend_Registry::get('config')->app->Imagenes;?>
+<script type="text/javascript">
+$(function(){
+	$('#arbol-materias').tree({  
+		dnd: true,
+		animate:true,
+		lines:true,
+		url: '<?php echo $this->url(array('controller' => 'AMP', 'action' => 'arbolmaterias')); ?>?nombre_tabla=tb_arbol_materias',
+		onDrop: function(target,source,point){			
+			var identificdorId = $(target).tree('getNode', target).id;
+			var idNodo = source.id;				
+			console.log(source.target);
+			
+			
+			/*$.ajax({  
+				url: '<?php echo $this->url(array('controller' => 'AMP', 'action' => 'dnd'));?>',  
+				type: 'post',  
+				dataType: 'json',  
+				data: {  
+					id: idNodo,  
+					targetId: identificdorId,  
+					point: point  
+				}  
+			});*/
+		}	
+	});
+	
+	$('#arbol-profesores').tree({  
+		dnd: true,
+		animate:true,
+		lines:true,
+		url: '<?php echo $this->url(array('controller' => 'AMP', 'action' => 'arbolmaterias')); ?>?nombre_tabla=tb_arbol_profesores',
+		onDrop: function(target,source,point){			
+			var identificdorId = $(target).tree('getNode', target).id;
+			var idNodo = source.id;				
+			console.log(source.target);		
+		},
+		/*onBeforeDrag: function(node){
+			console.log('arraga un nodo');
+		},*/
+		onDragEnter: function(target, source){
+			console.log(source);
+		}
+	});	
+	
+	$('.elimina').droppable({			            
+		onDragEnter:function(e,source){				
+			$(this).addClass('bote-rojo');				
+		},
+		onDragLeave:function(){			
+			$(this).removeClass('bote-rojo');
+		},
+		onDrop:function(e,source){
+			if ($(source).hasClass('assigned')){
+				$(this).removeClass('bote-rojo');
+				$(source).remove();			
+			}
+		}
+	});
+});
+</script>
+<style>
+	.elimina{
+		margin:0 auto;
+		width:150px;
+		height:150px;
+		background:url(<?php echo $rutaImgane.'/basura.jpg'?>) no-repeat scroll -133px 0 transparent;
+	}
+	.bote-rojo{
+		background-position:13px 0;
+	}
+	
+</style>
+<ul id="arbol-materias" class="easyui-tree" style="width:158px; display:inline-block; vertical-align:top;"></ul>
+<ul id="arbol-profesores" class="easyui-tree" style="width:158px; display:inline-block; vertical-align:top;"></ul>
+<div class="elimina" style="display:inline-block;"></div>

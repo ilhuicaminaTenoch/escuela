@@ -1,0 +1,35 @@
+<?php 
+$rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
+?>
+<div id="tabs" class="easyui-tabs" style="width:740px;height:540px">			
+	<div title="Datos escuela" style="padding:10px" id="datosEscuela"></div>
+	<div title="Lista de control" style="padding:10px" id="listaControl">
+		<table id="dg" class="easyui-datagrid" style="width:710px;height:250px" url="<?php echo $rutaPublica.'lista_alumnos.json';?>">
+			<thead>
+				<tr>			
+					<th field="CURP" width="230">CURP</th>            		
+					<th field="nombre" width="236">NOMBRE</th>            
+					<th field="edad" width="200">EDAD</th>            		
+				</tr>
+			</thead>
+		</table>
+
+	</div>
+	<div title="Bimestres" style="padding:10px">
+		
+	</div>
+</div>
+<script type="text/javascript">		
+	$('#dg').datagrid({		
+		method:'get',
+		singleSelect:true,
+		fitColumns:true,
+		striped:true,
+		pagination:true,
+		rownumbers:true,
+		sortName:"nombre",
+		sortOrder:"asc",
+		remoteSort:false
+		 
+	});
+</script>

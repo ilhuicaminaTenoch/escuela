@@ -1,0 +1,39 @@
+IN `N_ID_PERIFL` bigint(20),IN `S_NOMBRE` varchar(200),IN `S_CALLE` varchar(200),IN `S_NUMERO_INTERIOR` varchar(25),IN `S_NUMERO_EXTERIOR` varchar(25),IN `N_ID_CP` bigint(20),IN `N_ID_PAIS` varchar(20),IN `N_ID_ESTATUS` bigint(20),IN `D_FECHA_NACIMIENTO` date,IN `D_FECHA_INGRESO` date,IN `S_MATRICULA` varchar(100),IN `S_CURP` varchar(25),IN `S_FOTO` varchar(100),IN `S_CORREO` varchar(100),IN `S_USUARIO` varchar(100),IN `S_CONTRASENA` varchar(10),IN `S_SEXO` int(11)
+1,'NOMBRE','CALLE','1','A1',54180,'MEX',1,'2012-01-01','2012-05-03','MATRICULA','CURP','FOTO.JP','A@A.COM','USUARIO','COTRASEÑA',1,1,'nota',1,1
+
+IN `ID_PERIFL` bigint(20),IN `NOMBRE` varchar(200),IN `CALLE` varchar(200),IN `NUMERO_INTERIOR` varchar(25),IN `NUMERO_EXTERIOR` varchar(25),IN `ID_CP` bigint(20),IN `ID_PAIS` varchar(20),IN `ID_ESTATUS` bigint(20),IN `FECHA_NACIMIENTO` date,IN `FECHA_INGRESO` date,IN `MATRICULA` varchar(100),IN `CURP` varchar(25),IN `FOTO` varchar(100),IN `CORREO` varchar(100),IN `USUARIO` varchar(100),IN `CONTRASENA` varchar(10),IN `SEXO` int(11),IN `ID_GRUPO` bigint(20),IN `ID_GRADO` bigint(20),IN `NOTA` text,IN `TURNO` int(10)
+
+/*INSERT INTO tb_datos_generales(N_ID_PERIFLs,S_NOMBRE,S_CALLE,S_NUMERO_INTERIOR,S_NUMERO_EXTERIOR,N_ID_CP,N_ID_PAIS,N_ID_ESTATUS,D_FECHA_NACIMIENTO,D_FECHA_INGRESO,S_MATRICULA,S_CURP,S_FOTO,S_CORREO,S_USUARIO,S_CONTRASENA,S_SEXO)
+	VALUES(N_ID_PERIFL,S_NOMBRE,S_CALLE,S_NUMERO_INTERIOR,S_NUMERO_EXTERIOR,N_ID_CP,N_ID_PAIS,N_ID_ESTATUS,D_FECHA_NACIMIENTO,D_FECHA_INGRESO,S_MATRICULA,S_CURP,S_FOTO,S_CORREO,S_USUARIO,S_CONTRASENA,S_SEXO);
+	
+	INSERT into tb_alumno VALUES(N_ID_PERFILs,N_ID_GRUPO,N_ID_GRADO,S_NOTA,N_TURNO);*/
+<?php
+$db = Zend_Db_Table::getDefaultAdapter(); 
+  $sel = $db->select()->from('trainings')
+       ->joinLeft('reservation', 'trainings.training_date = reservation.training_date')
+       ->where('MONTH(trainings.training_date) = MONTH(NOW())')
+       ->where('YEAR(trainings.training_date) = YEAR(NOW())')
+       ->where('reservation.id_user = ?', $this->member)
+       ->where('reservation.status = ?', '1');
+  $stmt = $db->query($sel);
+        $result = $stmt->fetchAll();
+  if(empty($result)) {
+   $db->beginTransaction();
+   try {
+    $qry = "INSERT INTO reservation (`training_date`, `id_user`, `status`) VALUES 
+      ((SELECT training_date FROM trainings
+                WHERE training_date NOT IN (SELECT trainings.training_date FROM trainings
+                        LEFT JOIN (SELECT COUNT( `idreservation` ) AS reserved, `training_date`
+                          FROM `reservation` WHERE STATUS = '1' GROUP BY `training_date`
+                           ) AS reserves ON trainings.training_date = reserves.training_date
+                        WHERE reserves.reserved >= trainings.seats)
+                AND training_date = '".$this->date."'), ".$this->member.", '1')";
+    $db->query($qry);
+    $id = $db->lastInsertId();
+    $db->commit();
+    return $id;
+   } catch(Exception $e){
+    $db->rollback();
+             $this->msg['mess'] = "Error al guardar en la base de datos";
+         }
+  }

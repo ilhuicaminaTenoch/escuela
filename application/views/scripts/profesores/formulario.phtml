@@ -1,0 +1,189 @@
+<div id="dlg" class="easyui-dialog" style="width:1000px;height:480px;padding:10px 20px" closed="true" buttons="#dlg-buttons" modal="true">
+    <div class="container_12">
+        <div id="layout-alumnos" class="easyui-layout" style="width:960px;height:380px;">
+            <form id="fm" method="post" novalidate>
+				<input type="hidden" name="BANDERA" id="BANDERA" value="1"/>
+				<input type="hidden" name="TIPO" id="TIPO" value="tb_profesor"/>
+				<input type="hidden" name="N_ID_PERIFL" id="N_ID_PERIFL" value=""/>
+				<input type="hidden" name="N_DATOS_PERSONALES" id="N_DATOS_PERSONALES" value=""/>
+                <div data-options="region:'west',split:true" style="width:150px;">
+                    <section id="vista-previa"></section>
+                    <input id="file_upload" name="file_upload" type="file">                   
+                    <input type="hidden" name="S_FOTO" id="S_FOTO"/>
+                </div>
+                <div data-options="region:'center'">
+                    <div class="easyui-accordion" data-options="fit:true,border:false" >
+                        <?php echo $this->render('formularios/datos_generales_tab.phtml');
+							
+						?>
+						
+                        <div title="Otros Datos" style="padding:10px;">							
+                            <div class="grid_3">
+								<div class="fitem">
+									<label>Matricula</label>
+									<input name="S_MATRICULA" class="easyui-validatebox" data-options="missingMessage:'Este campo es obligatorio',required:true,validType:'length[3,200]'" readonly>
+								</div>
+                                <div class="fitem">
+                                    <label>Grado de estudio:</label>
+                                    <select class="easyui-combobox" name="N_ID_GRADO_ESTUDIO" id="N_ID_GRADO_ESTUDIO" style="width:224px;" data-options="missingMessage:'Este campo es obligatorio'">
+										<?php 
+										foreach($this->resultado as $llave => $valor){																				
+											echo"<option value='{$valor['ID']}'>{$valor['ESTUDIO']}</option>";								
+										}
+										?>
+									</select>
+                                </div>
+                                <div class="fitem">
+                                    <label>Sueldo:</label>
+                                    <input name="N_SUELDO" style="width:224px;" id="N_SUELDO" class="easyui-validatebox" data-options="missingMessage:'Este campo es obligatorio'">
+                                </div>
+                                <div class="fitem">
+                                    <label>Puesto:</label>                                    
+									<select class="easyui-combobox" style="width:224px;" name="N_ID_NIVEL_PUESTO" id="N_ID_NIVEL_PUESTO" style="width:200px;" data-options="missingMessage:'Este campo es obligatorio'">
+										<?php 
+										foreach($this->puesto as $llave => $valor){																				
+											echo"<option value='{$valor['ID']}'>{$valor['PUESTO']}</option>";								
+										}
+										?>
+									</select>
+								</div>
+                                <div class="fitem">
+                                    <label>Usuario:</label>
+                                    <input name="S_USUARIO" class="easyui-validatebox" data-options="missingMessage:'Este campo es obligatorio',required:true,validType:'length[3,200]'">
+                                </div>
+                                <div class="fitem">
+                                    <label>Contrase&ntilde;a:</label>
+                                    <input name="S_CONTRASENA" class="easyui-validatebox" data-options="missingMessage:'Este campo es obligatorio',required:true,validType:'length[3,200]'" type="password">
+                                </div>                               
+                            </div>
+                            <div class="grid_6">
+                                <div class="fitem">
+                                    <label>Nota:</label>                                    
+                                    <textarea name="S_NOTA" id="S_NOTA" style="width:444px; height:260px;" class="tinymce">
+										
+									</textarea>
+                                </div>
+                            </div>
+							
+                        </div>
+                    </div>
+                </div>           
+            </form>
+        </div>
+    </div>
+</div>
+<div id="dlg-buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onclick="saveUser()">Guardar</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">Cancelar</a>
+</div>
+<script>
+        var url;
+        function newUser() {
+            $('#dlg').dialog('open').dialog('setTitle', 'Ficha tecnica del alumno');
+            $('#fm').form('clear');
+            $("#vista-previa").css('background-image', 'none');
+			$('#BANDERA').attr('value','1');
+			$('#TIPO').attr('value','tb_profesor');
+			$('#N_ID_PERIFL').attr('value','2');
+			$('#N_DATOS_PERSONALES').attr('value','0');
+			$('#fm').form('load',{
+				S_MATRICULA:genera_matricula()				
+			});	
+            url = '<?php echo $this->url(array('controller' => 'Alumnos', 'action' => 'guarda')); ?>';
+        }
+        function editUser() {
+            var row = $('#dg').datagrid('getSelected');
+            if (row) {
+                $('#dlg').dialog('open').dialog('setTitle', 'Edita Alumno');
+                $('#fm').form('load', row);
+                $('#N_ID_PAIS').combobox('setValues', [row.Name, row.N_ID_PAIS]);                
+				$('#BANDERA').attr('value','2');
+				$('#TIPO').attr('value','tb_profesor');
+				$('#N_ID_PERIFL').attr('value','2');
+                var nombre_foto = $('#S_FOTO').val();
+                $("#vista-previa").css({
+                    'background-image': 'url(http://escuela/fotos/' + nombre_foto + ')',
+                    'background-size': '100px 100px',
+                    'background-repeat': 'no-repeat'
+                });
+                url = '<?php echo $this->url(array('controller' => 'Alumnos', 'action' => 'guarda')); ?>?N_DATOS_PERSONALES=' + row.N_DATOS_PERSONALES;
+            }
+        }
+        function saveUser() {
+            $('#fm').form('submit', {
+                url: url,
+                onSubmit: function() {
+                    /*var editor = tinyMCE.get('S_NOTA');
+                    param.S_NOTA = editor.getContent();*/
+                    return $(this).form('validate');
+
+                },
+                success: function(result) {
+                    if (result == '0') {
+                        $.messager.show({
+                            title: 'Error',
+                            msg: 'Este Profesor ya se encuentra registrado.'
+                        });
+                    } else if (result == '1') {
+                        $('#dlg').dialog('close');        // close the dialog
+                        $('#dg').datagrid('reload');    // reload the user data
+                    }
+                }
+            });
+        }
+        function removeUser() {
+            var row = $('#dg').datagrid('getSelected');
+            if (row) {
+                $.messager.confirm('Confirmacion', '\u00BFDeseas borrar este registro?', function(r) {
+                    if (r) {
+                        $.post('<?php echo $this->url(array('controller' => 'Alumnos', 'action' => 'elimina')); ?>', {N_DATOS_PERSONALES: row.N_DATOS_PERSONALES, TIPO:'tb_profesor'}, function(result) {
+                            if (result == '1') {
+                                $('#dg').datagrid('reload');	// reload the user data
+                            } else {
+                                $.messager.show({// show error message
+                                    title: 'Error',
+                                    msg: 'Se ha producido un error'
+                                });
+                            }
+                        }, 'json');
+                    }
+                });
+            }
+        }
+		
+
+        $(function() {
+
+            var pager = $('#dg').datagrid('getPager');
+            pager.pagination({
+                displayMsg: 'Mostrando {from} a {to} de {total} elementos',
+                beforePageText: 'Paginas',
+                afterPageText: ' de {pages}'
+            });
+			$('#N_ID_GRADO_ESTUDIO').combo({  
+				required:true,
+				editable: false,
+			});
+
+
+            $('#N_TURNO').combobox({
+                panelHeight: 'auto',
+                selectOnNavigation: false,
+                valueField: 'id',
+                textField: 'text',
+                editable: false,
+                required: true,
+                data: [{"id": "1", "text": "Matutino"}, {"id": "2", "text": "Vespertino"}]
+            });
+           
+            $('#N_ID_NIVEL_PUESTO').combobox({               
+                required: true,
+				editable: false
+            });
+
+
+
+
+
+        });
+</script>

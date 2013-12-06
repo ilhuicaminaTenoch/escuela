@@ -1,0 +1,119 @@
+<div title="Datos Personales" style="padding:10px;" id="alumnos_datos1">            
+    <div class="grid_3">
+        <div class="fitem">
+            <label>Nombre Completo:</label>
+            <input name="S_NOMBRE" class="easyui-validatebox nombre" data-options="missingMessage:'Este campo es obligatorio',required:true,validType:'length[3,200]'" class="100%">
+           
+        </div>
+        <div class="fitem">
+            <label>Calle:</label>
+            <input name="S_CALLE" class="easyui-validatebox" data-options="missingMessage:'Este campo es obligatorio',required:true,validType:'length[3,200]'">
+        </div>
+        <div class="fitem">
+            <label>No. interior:</label>
+            <input name="S_NUMERO_INTERIOR" class="easyui-validatebox">
+        </div>
+        <div class="fitem">
+            <label>No. exterior:</label>
+            <input name="S_NUMERO_EXTERIOR" class="easyui-validatebox" data-options="missingMessage:'Este campo es obligatorio',required:true,validType:'length[3,200]'">
+        </div>
+        <div class="fitem">
+            <label>Codigo postal:</label>
+            <input name="codigo_postal" id="cp" class="easyui-validatebox" data-options="missingMessage:'Este campo es obligatorio',required:true,validType:['codigoPostal']" onchange="consulta_cp();">                                    
+        </div>
+        <div class="fitem">
+            <label>Pa&iacute;s:</label>
+            <input id="N_ID_PAIS" style="width:224px" name="N_ID_PAIS" data-options="missingMessage:'Este campo es obligatorio'">
+
+        </div>
+    </div>
+    <div class="grid_3">
+        <div id="contenedor_cp">
+            <div class="fitem">
+                <label>Colinia</label>
+                <input name="id_codigo_postal" type="hidden">
+                <input disabled="disabled" name="colonia">
+            </div>
+            <div class="fitem">
+                <label>Estado:</label>
+                <input type="text" disabled="disabled" name="estado">
+            </div>
+            <div class="fitem">
+                <label>Municipio:</label>
+                <input type="text" disabled="disabled" name="municipio">
+            </div>
+            <div class="fitem">
+                <label>Localidad:</label>
+                <input type="text" disabled="disabled" name="localidad">
+            </div>
+        </div>
+        <div class="fitem">
+            <label>Estatus:</label>
+            <input class="easyui-combobox" style="width:224px" id="N_ID_ESTATUS" name="N_ID_ESTATUS" data-options="missingMessage:'Este campo es obligatorio'"/>
+        </div>
+        <div class="fitem">
+            <label>Fecha de nacimiento:</label>
+            <input name="D_FECHA_NACIMIENTO" id="D_FECHA_NACIMIENTO" type="text" class="easyui-datebox"
+                   data-options="missingMessage:'Este campo es obligatorio'" style="width:224px;"/>
+        </div>
+    </div>
+    <div class="grid_3">
+        <div class="fitem">
+            <label>Fecha de ingreso:</label>
+            <input name="D_FECHA_INGRESO" id="D_FECHA_INGRESO" class="easyui-datebox" style="width:224px;"
+                   data-options="missingMessage:'Este campo es obligatorio'"/>
+        </div>
+        <div class="fitem">
+            <label>C.U.R.P.:</label>
+            <input name="S_CURP" class="easyui-validatebox" data-options="missingMessage:'Este campo es obligatorio',required:true,validType:'length[3,200]'">
+        </div>
+        <div class="fitem">
+            <label>E-mail:</label>
+            <input name="S_CORREO" class="easyui-validatebox" data-options="missingMessage:'Este campo es obligatorio',required:true,validType:['email']">
+        </div>
+        <div class="fitem">
+            <label>Sexo:</label>
+            <input class="easyui-combobox" style="width:224px" id="S_SEXO" name="S_SEXO" data-options="missingMessage:'Este campo es obligatorio'"/>
+        </div>
+    </div>
+</div>
+<?php $timestamp = time(); ?>
+<script type="text/javascript" src="/js/datos_generales.js"></script>
+<script>
+$('#file_upload').uploadify({
+    'buttonText': 'Buscar Foto...',
+    'queueID': 'vista-previa',
+    'queueSizeLimit': 1,
+    /*'fileSizeLimit' : '3MB',
+     'fileTypeDesc' : 'Image Files',
+     'fileTypeExts' : '.jpg;',*/
+    'cancelImg': '/imagenes/uploadify-cancel.png',
+    'formData': {
+        'timestamp':'<?php echo $timestamp; ?>' ,
+        'token': '<?php echo md5('unique_salt' . $timestamp); ?>'
+    },
+    'swf': 'http://escuela/js/uploadify.swf',
+    'uploader': '<?php echo $this->url(array('controller' => 'Alumnos', 'action' => 'uploadify')); ?>',
+    'onUploadSuccess': function(file, data, response) {
+        switch (data) {
+            case '1':
+                $.messager.alert('OK', 'El archivo ' + file.name + ' se subio correctamente', 'info');
+                $("#vista-previa").css({
+                    'background-image': 'url(http://escuela/fotos/<?php echo $timestamp . '.jpg'; ?>)',
+                    'background-size': '100px 100px',
+                    'background-repeat': 'no-repeat'
+                });
+                $("#S_FOTO").attr("value",'<?php echo $timestamp . '.jpg'; ?>');
+                break;
+            case '2':
+                $.messager.alert('ERROR', 'El archivo debe de ser JPG y pesar menos de 3MB', 'error');
+                break;
+        }
+
+    },
+    'onUploadError': function(file, errorCode, errorMsg, errorString) {
+        $.messager.alert('ERROR', 'El archivo ' + file.name + ' no se pudo cargar', 'error');
+
+    }
+ });
+</script>

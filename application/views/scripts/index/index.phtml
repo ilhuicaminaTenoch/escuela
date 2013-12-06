@@ -1,0 +1,35 @@
+<style>
+	.centrar{margin: 0 auto;}
+</style>
+<?php if(!empty($this->message)) :?>
+	<div id="message">
+		<?php echo $this->escape($this->message);?>
+	</div>
+<?php endif;?>
+<div class="easyui-panel" title="Acceso al sistema" style="width:280px; padding:10px;" id="panelLogin">
+	<form id="ff" method="post" novalidate action="<?php echo $this->url(array('controller' => 'index', 'action' => 'index')); ?>">
+		<table>
+			<tr>
+				<td>Usuario:</td>
+				<td><input name="usuario" id="usuario" type="text" class="easyui-validatebox" data-options="missingMessage:'Este campo es obligatorio',required:true,validType:'length[3,200]'"></input></td>
+			</tr>
+			<tr>
+				<td>Contrase&ntilde;a:</td>
+				<td><input name="contrasena" id="contrasena" type="text" class="easyui-validatebox" data-options="missingMessage:'Este campo es obligatorio',required:true,validType:'length[3,200]'"></input></td>
+			</tr>			
+			<tr>
+				<td></td>
+				<td><input type="submit" class="easyui-linkbutton" iconCls="icon-ok" value="Entrar"/></td>
+			</tr>
+		</table>
+	</form>
+</div>
+<script type="text/javascript">
+	$(function(){		
+		$('#panelLogin').panel({
+			cls:'centrar'
+		});
+	});
+	
+
+</script>

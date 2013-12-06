@@ -1,0 +1,51 @@
+<?php 
+$url = Zend_Registry::get('config')->app->baseUrl;
+?>
+<div class="easyui-layout" style="width:959px;height:600px;">
+	<div data-options="region:'west',split:true" title="Lista de Grupos" style="width:180px;">
+		<ul id="menu_arbol">					
+			<?php
+			$contador_grupos = 1;
+			$contador_materias = 1;			
+			foreach($this->datos as $llave_padres => $valor_padres){
+				$separa= explode('_',$llave_padres);
+				if($contador_grupos == count($this->arreglo)){
+					echo "<li class='cierre' id='padre_{$separa[1]}'>";
+				}else{
+					echo "<li id='padre_{$separa[1]}'>";
+				}
+				echo "<a href='#'>{$separa[1]}</a>";
+					echo"<ul class='contenedor-hijos'>";
+						foreach($valor_padres as $hijos_llave => $hijos_valor){
+							if($contador_grupos > 1){
+								$contador_materias=1;					
+							}
+							if($contador_materias == count($valor_padres)){
+								echo"<li class='cierre'><a href='#' onclick='carga_alumnos({$separa[0]})'>{$hijos_valor['materia']}</a></li>";	
+							}else{
+								echo"<li><a href='#' onclick='carga_alumnos({$separa[0]})'>{$hijos_valor['materia']}</a></li>";
+							}
+							$contador_materias++;
+						}
+					echo"</ul>";
+				echo"</li>";				
+				$contador_grupos++;				
+			}
+			?>			
+		</ul>	
+	</div>
+	<div data-options="region:'center',title:'<?php echo 'Profesor: '.Zend_Auth::getInstance()->getIdentity()->S_NOMBRE;?>',iconCls:'icon-ok'" id="contenedorTabs"></div>
+</div>
+<script>
+	$('#tabs').tabs({
+		tabPosition:'bottom'
+	});
+	$('#menu_arbol ul').hide();
+	$('#menu_arbol a').click(function(){
+		$(this).next().slideToggle('fast');
+		return false;
+	});
+	function carga_alumnos(id_grupo){		
+		$('#contenedorTabs').html('<iframe width="775" height="560" scrolling="No" frameborder="0" name="control" id="control" allowtransparency="true" src="<?php echo $this->url(array('controler'=>'Lista','action'=>'tabs'));?>?id_grupo='+id_grupo+'"></iframe>');
+	}
+</script>

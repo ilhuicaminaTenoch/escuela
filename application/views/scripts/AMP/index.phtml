@@ -1,0 +1,238 @@
+<?php 
+$rutaImgane = Zend_Registry::get('config')->app->Imagenes;
+$rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
+$total_materias = count($this->materias);
+?>
+<style>
+	.elimina{
+		margin:0 auto;
+		width:150px;
+		height:150px;
+		background:url(<?php echo $rutaImgane.'/basura.jpg'?>) no-repeat scroll -133px 0 transparent;
+	}
+	.bote-rojo{
+		background-position:13px 0;
+	}
+	
+</style>
+<div class="grid_2">
+	<input type="hidden" value="<?php echo $total_materias;?>" id="total_materias"/>
+	<ul id="contenedor_materias">
+		<?php
+		foreach($this->materias as $llave => $dato){			
+			echo "<li data-materia='{$dato['id']}' data-nombremateria='{$dato['materia']}'>{$dato['materia']}</li>";
+		}
+		?>
+	</ul>
+</div>
+<div class="grid_10">
+	<table id="asignaciones">
+		<tr>
+			<td>Profesores </td>
+			<td colspan="8">Materias</td>
+		</tr>
+		<?php
+			$valida = isset($this->profesores_materias[0]['dato']);
+			$contador=1;
+			
+			if($valida != '1'){
+				foreach($this->profesores as $dato){				?>
+				<tr data-idprofesor='<?php echo $dato['id_profesor']; ?>'  data-nombreprofesor="<?php echo $dato['nombre']; ?>" id="<?php echo"profe_{$dato['id_profesor']}"?>">
+				<?php 
+					echo"<td class='time'><span style='font-size:12px;'>{$dato['nombre']}</span></td>";				
+					$contadormaterias=0;					
+					foreach($this->profesores_materias as $datomaterias){					
+						if($dato['id_profesor'] == $datomaterias['id_profesor']){
+							echo'<td class="drop">';
+							echo'<li data-materia="'.$datomaterias['id_materia'].'" data-nombremateria="'.$datomaterias['materia'].'" style="position: static; left: 204.5px; top: 8px;" class="assigned">'.$datomaterias['materia'].'</li></td>';						
+							$contadormaterias++;
+						}						
+					}				
+					$td_faltantes = $total_materias-$contadormaterias;
+					for($i=0; $i<$td_faltantes; $i++){
+						echo'<td class="drop"></td>';						
+					}				
+				?>
+				</tr>			
+			<?php 
+				$contador++;				
+				}
+			}else{
+				foreach($this->profesores as $dato){				?>
+				<tr data-idprofesor='<?php echo $dato['id_profesor']; ?>'  data-nombreprofesor="<?php echo $dato['nombre']; ?>" id="<?php echo"profe_{$dato['id_profesor']}"?>">
+				<?php 
+					echo"<td class='time'><span style='font-size:12px;'>{$dato['nombre']}</span></td>";				
+					$contadormaterias=0;					
+					for($i=0; $i<$total_materias; $i++){
+						echo'<td class="drop"></td>';
+					}									
+				?>
+				</tr>			
+			<?php 
+				$contador++;				
+				}
+			} ?>
+	</table> 
+	
+	<a href="#" id="save" class="easyui-linkbutton" onclick="guardar();" iconCls="icon-save" style="margin-top: 10px;">Guardar</a>  
+	<div class="elimina"></div>
+	</div>
+<script>
+	$(document).ready(function() {
+		//$('body').attr('onLoad','carga_json()');		
+	});	
+	function carga_json(){
+		var base_url='<?php echo $rutaPublica?>AsignacionesProfesorMaterias.json';
+		var total_materias = $("#total_materias").val();		
+		var contador=1;
+		$.getJSON(base_url, function(data) {
+			var output='<tbody>';
+			output='<tr>';
+			output+='<td>Profesores </td>';
+			output+='<td colspan="'+total_materias+'">Materias</td>';
+			output+='</tr>';
+			$.each(data, function(indice, profesor) {				
+				output+='<tr data-idprofesor="'+this.id+'"  data-nombreprofesor="'+this.profesor+'" id="profe_'+this.id+'">';
+				output+='<td class="time"><span style="font-size:12px;">'+this.profesor+'</span></td>';				
+				$.each(profesor.materias, function(llave, materia) {				
+					output+='<td class="drop droppable">';
+					output+='<li data-materia="'+materia.id+'" data-nombremateria="'+materia.nombre+'" style="position: static; left: 204.5px; top: 8px;" class="assigned">'+materia.nombre+'</li>';
+					output+='</td>';
+					
+					
+					//contador++;
+				});
+				output+='</tr>';
+				output+='</tbody>';
+				
+			});
+			//$('#asignaciones').html(output);
+		});		
+	}
+	function guardar(){		
+		var total_profesores = $('table tr').size() - 1;
+		var contador = 1;
+		$("table tr").each(function(index, value) {
+			var id_profesor = $(this).attr('data-idprofesor');	
+			if(typeof id_profesor !='undefined'){
+				var total_materias_por_profesor = $("table tr#profe_"+id_profesor+" td.drop li").size();				
+				if(total_materias_por_profesor > 0){
+					$("table tr#profe_"+id_profesor).addClass('asignado');
+				}else if(total_materias_por_profesor == 0){
+					$("table tr#profe_"+id_profesor).removeClass('asignado');
+				}
+			}
+		});
+		var cuenta_asignado = $('.asignado').size();
+		var json='{';
+		$("table tr").each(function(index, value) {
+			var id_profesor = $(this).attr('data-idprofesor');
+			var nombre_profesor = $(this).attr('data-nombreprofesor');
+			if(typeof id_profesor !='undefined'){				
+				var total_materias_por_profesor = $("table tr#profe_"+id_profesor+" td.drop li").size();				
+				var total_materias = $("table tr td.drop li").size();
+				if(total_materias_por_profesor > 0){					
+					json+='"'+id_profesor+'":[';					
+					$("table tr#profe_"+id_profesor+" td.drop li").each(function(indice, valor) {
+						indice ++;
+						var id_materia= $(this).attr('data-materia');	
+						var nombre_materia= $(this).attr('data-nombremateria');							
+						if(indice < total_materias_por_profesor){														
+							json+='"'+id_materia+'",';														
+						}else{							
+							json+='"'+id_materia+'"';							
+						}						
+					});					
+					if(contador < cuenta_asignado){
+						json +='],';
+					}else{
+						json +=']';
+					}
+					contador++;
+				}
+			}
+		});
+		json +='}';
+		//console.log(json);		
+		$.ajax({
+			url: '<?php echo $this->url(array('controller' => 'AMP', 'action' => 'guarda'));?>',  
+			async:true,
+			data: 'cadena='+json,
+			beforeSend: function(objeto){
+				$('#save').linkbutton('disable');
+			},
+			complete: function(objeto, exito){				
+				if(exito=="success"){
+					$('#save').linkbutton('enable');
+				}
+			},
+			contentType: "application/x-www-form-urlencoded",
+			dataType: "html",
+			error: function(objeto, quepaso, otroobj){				
+				alerta('ERROR.','Estas viendo esto por que fallo la peticion y el error es el siguiente '+quepaso,'error');
+			},			
+			success: function(datos){
+				alerta('O.K.','Los datos se guardaron con exito','info');
+			},
+			timeout: 3000,
+			type: "POST"
+		});
+		
+	}
+	function alerta(titulo, mensaje,tipo_mensaje){		
+		$.messager.alert(titulo,mensaje,tipo_mensaje);
+	}
+	$(function(){		
+		$('.grid_10 td.drop li').draggable({
+			revert:true,
+			proxy:'clone'
+		});	
+		$('.grid_10 .elimina').droppable({			            
+			onDragEnter:function(e,source){				
+				$(this).addClass('bote-rojo');				
+			},
+			onDragLeave:function(){			
+				$(this).removeClass('bote-rojo');
+			},
+			onDrop:function(e,source){
+				if ($(source).hasClass('assigned')){
+					$(this).removeClass('bote-rojo');
+					$(source).remove();			
+				}
+			}
+		});
+		
+		/*materias*/
+		$('#contenedor_materias li').draggable({
+			revert:true,
+			proxy:'clone'
+		});	
+		
+		$('.grid_10 td.drop').droppable({
+			onDragEnter:function(e,source){				
+				$(this).addClass('over');
+				
+			},
+			onDragLeave:function(){
+				$(this).removeClass('over');				
+			},
+			onDrop:function(e,source){
+				/*Valida que no haya materias iguales
+				$("table tr").each(function(index, value) {	
+				})
+				Fin validacion*/
+				if ($(source).hasClass('assigned')){							
+					$(this).removeClass('over');					
+					$(this).append(source);				
+				}else{					
+					$(this).removeClass('over');
+					var c = $(source).clone().addClass('assigned');
+					$(this).empty().append(c);
+					c.draggable({ revert:true });
+					var id_materia=$(source).attr('data-materia');					
+				}			
+			}
+		});
+		
+	});
+</script>

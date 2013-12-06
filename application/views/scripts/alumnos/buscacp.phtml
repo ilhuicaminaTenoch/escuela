@@ -1,0 +1,53 @@
+<?php
+$arreglo = $this->cargaCP;
+if($arreglo[2] == true){
+   echo"
+	<div class=\"fitem\">
+		<label>Colonia:</label> 
+		<select id=\"id_codigo_postal\" name=\"id_codigo_postal\" class=\"easyui-combobox\" style=\"width:153px;\" data-options=\"missingMessage:'Este campo es obligatorio',required:true\">
+    		<option value=\"\" selected>Selecciona</option>";
+		    foreach($arreglo[0] as $key=>$value){
+		        echo "<option value=\"{$value['id_codigo_postal']}\">{$value['colonia']}</option>";
+		    }
+   echo"</select>
+    </div>
+   ";
+    foreach($arreglo[1] as $key=>$value){
+        echo "<div class=\"fitem\">
+        		<label>Estado:</label>
+        		<input type=\"text\" value=\"{$value['estado']}\" disabled=\"disabled\"/>
+        	  </div>
+        	  
+        	  <div class=\"fitem\">
+        		<label>Municipio:</label>
+        		<input type=\"text\" value=\"{$value['municipio']}\" disabled=\"disabled\"/>
+        	  </div>
+        	  
+        	  <div class=\"fitem\">
+        		<label>Localidad:</label>
+        		<input type=\"text\" value=\"{$value['localidad']}\" disabled=\"disabled\"/>
+        	  </div>";
+    }
+}else{    
+    foreach($arreglo[0] as $key=>$value){
+        echo "<div class=\"fitem\">
+        		<label>Colinia</label>
+        		<input type=\"hidden\" name=\"id_codigo_postal\" id=\"id_codigo_postal\" value=\"{$value['id_codigo_postal']}\">
+        		<input type=\"text\" value=\"{$value['colonia']}\" class=\"easyui-validatebox\" disabled=\"disabled\">
+        	 </div>
+        	 <div class=\"fitem\">
+        		<label>Estado:</label>
+        		<input type=\"text\" value=\"{$value['estado']}\" disabled=\"disabled\"/>
+        	 </div>
+        	 <div class=\"fitem\">
+        		<label>Municipio:</label>
+        		<input type=\"text\" value=\"{$value['municipio']}\" disabled=\"disabled\"/>
+        	 </div>
+        	 <div class=\"fitem\">
+        		<label>Localidad:</label>
+        		<input type=\"text\" value=\"{$value['localidad']}\" disabled=\"disabled\"/>
+        	 </div>";
+        
+    } 
+    
+}

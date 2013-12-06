@@ -1,0 +1,74 @@
+{
+    "grupo": [
+        {
+            "nombre": "A",
+            "horario": [
+                {
+                    "hora": 1,
+                    "días": [
+                        {
+                            "día": "Lunes",
+                            "materia": 1,
+                            "profesor": 2
+                        },
+                        {
+                            "día": "Martes",
+                            "materia": 1,
+                            "profesor": 2
+                        }
+                    ]
+                },
+                {
+                    "hora": 2,
+                    "días": [
+                        {
+                            "día": "Lunes",
+                            "materia": 2,
+                            "profesor": 3
+                        },
+                        {
+                            "día": "Martes",
+                            "materia": 1,
+                            "profesor": 2
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "nombre": "B",
+            "horario": [
+                {
+                    "hora": 1,
+                    "días": [
+                        {
+                            "día": "Lunes",
+                            "materia": 1,
+                            "profesor": 2
+                        },
+                        {
+                            "día": "Martes",
+                            "materia": 1,
+                            "profesor": 2
+                        }
+                    ]
+                },
+                {
+                    "hora": 2,
+                    "días": [
+                        {
+                            "día": "Lunes",
+                            "materia": 2,
+                            "profesor": 3
+                        },
+                        {
+                            "día": "Martes",
+                            "materia": 1,
+                            "profesor": 2
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

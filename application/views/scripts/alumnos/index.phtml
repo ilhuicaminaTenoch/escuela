@@ -1,0 +1,60 @@
+<script src="http://escuela/js/jquery.uploadify.min.js" type="text/javascript"></script>
+
+<!-- Load TinyMCE -->
+<script type="text/javascript" src="http://escuela/tinymce/jscripts/tiny_mce/jquery.tinymce.js"></script>
+<script type="text/javascript">
+	$().ready(function() {
+		$('textarea.tinymce').tinymce({			
+			script_url : 'http://escuela/tinymce/jscripts/tiny_mce/tiny_mce.js',			
+			theme : "simple"
+			
+		});
+	});
+</script>
+<!-- /TinyMCE -->
+<link rel="stylesheet" type="text/css" href="http://escuela/css/uploadify.css">
+
+<h1>Catalogo de Alumnos</h1>
+<table id="dg" class="easyui-datagrid" style="width:960px;height:340px"
+       url="<?php echo $this->url(array('controller' => 'Alumnos', 'action' => 'datosjson')); ?>"
+       toolbar="#toolbar" pagination="true"
+       rownumbers="true" fitColumns="true" singleSelect="true"		
+       >
+    <thead>
+        <tr>			
+            <th field="S_NOMBRE" width="139">Nombre</th>            		
+            <th field="D_FECHA_INGRESO">Fecha de ingreso</th>            
+            <th field="N_ID_ESTATUS">Estatus</th>
+            <th field="S_CURP">C.U.R.P.</th>			
+        </tr>
+    </thead>
+</table>
+
+<div id="toolbar">
+    <div class="grid_8">
+        <a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="newUser()">Nuevo Alumno</a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editUser()">Edita Alumno</a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="removeUser()">Quita Alumno</a>
+        <a href="#" class="easyui-linkbutton" onclick="importar();">Importar a EXCEL</a>
+        <a href="<?php echo $this->url(array('controller' => 'Alumnos', 'action' => 'exportarexcel')); ?>" class="easyui-linkbutton" target="_blank">Exportar a EXCEL</a>
+    </div>	
+
+    <div class="grid_4">
+        <span>Nombre:</span>  
+        <input id="Snombre" style="line-height:18px;border:1px solid #ccc">      
+        <a href="#" class="easyui-linkbutton" plain="true" onclick="doSearch()">Buscar</a>
+    </div>  
+</div>
+<?php
+	$arreglo = ["lista_padres"=>$this->lista_padres];
+	//echo'<pre>'; print_r($arreglo); echo'</pre>';
+    echo $this->partial('alumnos/formulario.phtml',$arreglo);
+    echo $this->render('formularios/exportar_excel.phtml');
+?>
+
+<script type="text/javascript">            
+    function doSearch() {
+        $('#dg').datagrid('load', {Snombre: $('#Snombre').val()});
+    }
+    
+</script>

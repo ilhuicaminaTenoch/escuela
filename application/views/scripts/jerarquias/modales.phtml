@@ -1,0 +1,60 @@
+<div id="dlgTipos" class="easyui-dialog" style="width:400px;height:280px;padding:10px 20px" closed="true" buttons="#dlgTipos-buttons">
+	<form id="fmTipos" method="post" novalidate>
+		<div class="fitem">
+			<label>Tipo:</label>
+			<input name="padre" class="easyui-validatebox" data-options="missingMessage:'Este campo es obligatorio',required:true,validType:'length[3,200]'">
+			<input name="id_padre" type="hidden" value="0">
+			<input name="auxiliar" type="hidden" value="NULL">
+		</div>		
+	</form>
+</div>
+<div id="dlgTipos-buttons">
+	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onclick="guardaTipo('Tipos')">Guardar</a>
+	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlgTipos').dialog('close')">Cancelar</a>
+</div>
+
+<div id="dlgElementos" class="easyui-dialog" style="width:600px;height:500px;padding:10px 20px" closed="true" buttons="#dlgElementos-buttons" modal="true">
+	<form id="fmElementos" method="post" novalidate>
+		<div class="fitem">			
+			<!-- SI ESCOGEN A PROFESORES
+			<select id="cc" class="easyui-combogrid" name="cc" style="width:250px;"></select>
+			<input type="text" value="" id="Tipos" name="Tipos"/>
+			<input type="text" value="" id="Niveles" name="Niveles"/>
+			<input type="text" value="" id="padre" name="padre"/>
+			<!-- FIN ESCOGEN PROFESORES -->
+			
+			<!-- SI ESCOGEN GRUPOS -->
+			<table id="dgAlumnosSinGurpo" class="easyui-datagrid" style="width:550px;height:350px" title="Alumnos Sin Grupo"
+			data-options= "pagination:true,rownumbers:true,singleSelect:false,url:'<?php echo $this->url(array('controller' => 'Jerarquias', 'action' => 'jsonalumnos')); ?>',method:'post',toolbar:'#toolbar'">
+			<thead>
+				<tr>
+					<th data-options="field:'ck',checkbox:true"></th>
+					<th data-options="field:'id',width:45">ID</th>					
+					<th data-options="field:'nombre', width:210">Nombre</th>            
+					<th data-options="field:'fecha', width:150">Fecha de Nacimiento</th>
+					<th data-options="field:'matricula', width:90">Matricula</th>
+					<th data-options="field:'sexo', width:65">Sexo</th>
+				</tr>
+			</thead>
+			</table>
+			<input type="hidden" value="" id="Tipos" name="Tipos"/>
+			<input type="hidden" value="" id="Niveles" name="Niveles"/>
+			<input type="hidden" value="" id="padre" name="padre"/>
+			
+		</div>		
+	</form>
+</div>
+<div id="dlgElementos-buttons">
+	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onclick="guardaTipo('Elementos')">Guardar</a>
+	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlgElementos').dialog('close')">Cancelar</a>
+</div>
+<div id="toolbar">
+	<span>Nombre:</span>  
+    <input id="q" style="line-height:18px;border:1px solid #ccc">      
+    <a href="#" class="easyui-linkbutton" plain="true" onclick="doSearch()">Buscar</a>
+</div>
+<script>
+	function doSearch() {
+        $('#dgAlumnosSinGurpo').datagrid('load', {q: $('#q').val()});		
+    }	
+</script>

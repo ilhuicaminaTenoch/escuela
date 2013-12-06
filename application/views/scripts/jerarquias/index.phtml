@@ -1,0 +1,140 @@
+<div class="easyui-layout" style="width:960px;height:500px;">	
+	<div data-options="region:'center',iconCls:'icon-ok'" title="Jerarquias">
+		<div class="easyui-layout" data-options="fit:true">			
+			<div data-options="region:'west',split:true,border:false" style="width:320px" title="Tipos" id="contenedor-tipos">
+				<select style="width:100%;" size="20" id="Tipos" name="Tipos" onchange="elemento('Tipos','Niveles','<?php echo $this->url(array('controller' => 'Jerarquias', 'action' => 'listaniveles'));?>')">
+					<?php 
+						foreach($this->tipos as $tipo){
+							echo"<option value='{$tipo['id']}'>{$tipo['nombre']}</option>";
+						}
+					?>					
+				</select>
+				<div style="margin:5px auto;">
+					<a href="javascript:void(0)" onclick="nuevoTipo('guardatipos','Tipos');"class="easyui-linkbutton" data-options="iconCls:'icon-add'" style="margin:0 auto">Agregar</a>
+					<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove'" style="margin:0 auto">Borrar</a>
+				</div>
+			</div>
+			<div data-options="region:'center',border:false" style="width:320px;" title="Niveles" id="nivel_2">
+				<select style="width:100%;" size="20" id="Niveles" name="Niveles" onchange="elemento('Niveles','Elementos','<?php echo $this->url(array('controller' => 'Jerarquias', 'action' => 'listaelementos'));?>')"></select>				
+			</div>
+			<div data-options="region:'east',split:true,border:false" style="width:320px;" title="Elementos" id="nivel_3">
+				<select style="width:100%;" size="20" id="Elementos" name="Elementos" multiple></select>
+				<div style="margin:5px auto;">
+					<a href="javascript:void(0)" id="boton_Elementos_add" onclick="nuevoTipo('guardatipos','Elementos');"class="easyui-linkbutton" data-options="iconCls:'icon-add',disabled:true" style="margin:0 auto">Agregar</a>
+					<a href="javascript:void(0)" id="boton_Elementos_remove" onclick="quitaElemento();" class="easyui-linkbutton" data-options="iconCls:'icon-remove',disabled:true" style="margin:0 auto">Borrar</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<?php 
+	echo $this->render('jerarquias/modales.phtml');
+?>
+
+<script type="text/javascript">
+	var url;	
+	function nuevoTipo(action,seccion){
+        $('#dlg'+seccion).dialog('open').dialog('setTitle',seccion);		
+        url = "/Jerarquias/"+action;
+	}
+	function obtenerElementos(id_grid){
+		var ss = [];
+		var rows = $('#'+id_grid).datagrid('getSelections');
+		for(var i=0; i<rows.length; i++){
+			var row = rows[i];
+			ss.push(row.id);
+		}		
+		var junta = ss.join(',');
+		return junta;
+	}
+	function guardaTipo(seccion){
+		var id_hijo = $("#Niveles option:selected").val();
+		var id_padre = $("#Tipos option:selected").val();
+		$('#fm'+seccion).form('submit',{
+			url: url,
+			onSubmit: function(param){
+				param.id_alumnos = obtenerElementos('dgAlumnosSinGurpo');				
+				param.id_padre = id_padre;
+				param.id_hijo = id_hijo;				
+			},
+			success: function(result){				
+				if (result == '1'){
+					$.messager.show({
+						title: 'Error',
+						msg: result.errorMsg
+					});					
+				}else {					
+					$('#dlg'+seccion).dialog('close'); 
+					load(seccion,id_hijo,id_padre);
+					$('#dgAlumnosSinGurpo').datagrid('reload');
+				}
+			}
+		});
+	}
+	function load(seccion,id_actual,id_padre){
+		$.ajax({
+			url: "<?php echo $this->url(array('controller' => 'Jerarquias', 'action' => 'listaelementos'));?>",
+			async:true,
+			beforeSend: function(objeto){
+				$('#'+seccion).attr('disabled', 'disabled');
+			},
+			complete: function(objeto, exito){
+				$('#'+seccion).removeAttr('disabled');
+			},
+			contentType: "application/x-www-form-urlencoded",
+			dataType: "html",
+			error: function(objeto, quepaso, otroobj){
+				alert("Estas viendo esto por que fallé");
+				alert("Pasó lo siguiente: "+quepaso);
+			},			
+			success: function(datos){
+				$('#'+seccion).html(datos);
+			},
+			timeout: 3000,
+			type: "POST",
+			data: 'id_actual='+id_actual+'&id_padre='+id_padre
+		});
+	}
+	function elemento(id,seccion,action){		
+		var id_actual = $("#"+id).val(),
+			id_padre = $("#Tipos option:selected").val();					
+		$.ajax({
+			url: action,
+			data:"id_actual="+id_actual+"&id_padre="+parseInt(id_padre),
+			async:true,
+			beforeSend: function(objeto){
+				$('#'+seccion).attr('disabled', 'disabled');
+			},
+			complete: function(objeto, exito){
+				$('#'+seccion).removeAttr('disabled');
+				$('#boton_'+seccion+'_add').linkbutton({disabled: false});
+				$('#boton_'+seccion+'_remove').linkbutton({disabled: false});								
+			},
+			contentType: "application/x-www-form-urlencoded",
+			dataType: "html",
+			error: function(objeto, quepaso, otroobj){
+				alert("Estas viendo esto por que fallé");
+				alert("Pasó lo siguiente: "+quepaso);
+			},			
+			success: function(datos){
+				$('#'+seccion).html(datos);
+			},
+			timeout: 3000,
+			type: "POST"
+		});
+		
+	}	
+	function quitaElemento(){
+		var id_tipo = $("#Tipos option:selected").val();
+		var id_elementos = $("#Elementos").val();	
+		var id_nivel = $("#Niveles option:selected").val();						
+		$.messager.confirm('Confirmacion', '\u00BFDeseas quitar este alumnos?', function(r) {
+			if (r) {
+				$.post('<?php echo $this->url(array('controller' => 'Jerarquias', 'action' => 'quita')); ?>', {id_alumno: id_elementos}, function(result) {
+					load('Elementos',id_nivel,id_tipo);
+					$('#dgAlumnosSinGurpo').datagrid('reload');
+				});
+			}
+		});
+	}
+</script>

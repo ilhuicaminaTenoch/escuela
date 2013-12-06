@@ -1,0 +1,35 @@
+[
+    {
+        "profesor": "Jose Manuel Moreno Plaza",
+        "id": "1",
+        "materias": [
+            {
+                "id": "1",
+                "nombre": "Matematicas"
+            },
+            {
+                "id": "2",
+                "nombre": "Español"
+            },
+            {
+                "id": "3",
+                "nombre": "Historia"
+            }
+        ]
+    },
+    {
+        "profesor": "Fernando Moreno Plaza",
+        "id": "2",
+        "materias": [
+            {
+                "id": "1",
+                "nombre": "Matematicas"
+            },
+            {
+                "id": "2",
+                "nombre": "Español"
+            }
+            
+        ]
+    }
+]

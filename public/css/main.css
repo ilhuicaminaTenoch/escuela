@@ -1,0 +1,156 @@
+#fm{  
+    margin:0;  
+    padding:10px 30px;  
+}  
+.ftitle{  
+    font-size:14px;  
+    font-weight:bold;  
+    padding:5px 0;  
+    margin-bottom:10px;  
+    border-bottom:1px solid #ccc;  
+}  
+.fitem{  
+    margin-bottom:5px;  
+}  
+.fitem label{  
+    display:inline-block;  
+    width:104px;  
+}
+#toolbar{
+	display:inline;
+	float:left;
+	width:100%
+}
+#tb .cambio_moneda{
+		display:inline-block;
+		margin-left:30px;
+}
+#moneda{display:none;}
+.btnPdf{	
+	margin-left: 30px;
+}
+#vista-previa{
+	border:1px solid #95B8E7;
+	width:100px;
+	height:100px;
+        margin: 10px auto;
+}
+.uploadify-button {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+}
+.uploadify:hover .uploadify-button {
+    background-color: transparent;
+}
+#layout-alumnos input{width:100%}
+.boton-file{
+    display: block;
+    margin: 0 auto;
+    width: 83px;
+    text-decoration: none;
+    color: #000;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/*
+* ESTILOS PARA EL MODULO DE ASIGNACION DE MATERIAS A PROFESORES
+*/
+#contenedor_materias, ul, li{
+	list-style:none;
+	padding:0;
+	margin:0;
+}
+#contenedor_materias li{
+	display:inline-block;
+	width:73px;
+	padding:5px;
+	margin:4px 0 4px 0;
+	text-align:center;
+	border:1px solid #499B33;
+	background:#fafafa;
+	font-size:12px;
+}
+.grid_10 table{
+	background:#E0ECFF;
+	width:100%;
+}
+.grid_10 td{
+	background:#fafafa;
+	text-align:center;
+	padding:2px;
+}
+.grid_10 td{
+	background:#E0ECFF;
+}
+.grid_10 td.drop{
+	background:#fafafa;
+	width:100px;
+	height:24px;
+}
+.grid_10 td.over, .over{
+	background:#FBEC88;
+}
+.assigned{
+	border:1px solid #BC2A4D;
+}
+.grid_10 td.ocupado{
+	background:#CCCCCC;
+}
+
+/**********jerarquias***************/
+.easyui-layout #header label{
+	display:block;
+	margin:0 auto;
+	padding:5px;
+	text-align: center;
+}
+.easyui-layout label.ruta{
+	text-align: left;
+	padding: 10px;
+	display: block;
+}
+
+/*********ASIGANCION DE PROFESORES A GRUPOS*************/
+ul#menu_arbol, ul#menu_arbol ul {
+	list-style-type: none;
+	background: url(http://escuela/imagenes/linea_vertical.gif) repeat-y;	
+	display:inline-block;
+	vertical-align:top;	
+}
+ul#menu_arbol li {
+	padding: 0 10px;
+	display:block;	
+}
+ul#menu_arbol li a{
+	text-decoration:none;
+	display:block;
+}
+ul#menu_arbol ul {
+	margin-left: 5px;
+}
+ul#menu_arbol li {
+     padding: 0 10px;
+     background: url(http://escuela/imagenes/nodo.gif) no-repeat;
+	 
+}
+ul#menu_arbol li.cierre {
+     background: #FFF url(http://escuela/imagenes/cierre.gif) left top no-repeat;
+}
+.dp{opacity:0.5; filter:alpha(opacity=50);}
+#horario th{text-align:center;}
+#horario td, th{
+	border-width: 0 1px 1px 0;
+	border-style: dotted;
+	border-color: #ccc;
+}
+.assigned-materia{
+	background: #eaf2ff;
+	color: #000000;
+	cursor: default;
+	text-align: center;
+	display: block;
+	text-decoration: none;
+}
+

@@ -1,0 +1,85 @@
+<?php $timestamp_excel = time(); ?>
+<div id="dlg_file" class="easyui-dialog" style="width:400px;height:280px;padding:10px 20px" closed="true" modal="true">
+    <input id="file_upload_excel" name="file_upload_excel" type="file">
+     <a href="javascript:$('#file_upload_excel').uploadify('upload')" class="boton-file">Subir archivo</a>
+</div>
+<script>
+    function importar(){
+         $('#dlg_file').dialog('open');
+
+    }
+    
+$(function() {
+    $('#file_upload_excel').uploadify({
+        'auto':false,
+        'buttonText': 'Examinar...',        
+        'fileTypeDesc' : 'Archivos de Excel',
+        'fileTypeExts' : '.xlsx;',
+        //'uploadLimit' : 2,
+        'multi'    : false,
+        'cancelImg': 'http://escuela/imagenes/uploadify-cancel.png',
+        'formData': {
+            'timestamp': '<?php echo $timestamp_excel; ?>',
+            'token': '<?php echo md5('unique_salt' . $timestamp_excel); ?>'
+        },
+        'swf': 'http://escuela/js/uploadify.swf',
+        'uploader': '<?php echo $this->url(array('controller' => 'Alumnos', 'action' => 'uploadexcel')); ?>',
+        'onUploadSuccess': function(file, data, response) {            
+            switch (data) {
+                case '0':
+                    $('#dg').datagrid('reload');
+                break;
+                case '1':
+                    $.messager.alert('ERROR', 'El archivo subido excede la directiva upload_max_filesize en php.ini', 'error');
+                break;
+                case '2':
+                    $.messager.alert('ERROR', 'El archivo subido excede la directiva MAX_FILE_SIZE que se especificó en el formulario HTML', 'error');
+                break;
+                case '3':
+                    $.messager.alert('ERROR', 'El archivo subido fue sólo parcialmente cargado', 'error');
+                break;
+                case '4':
+                    $.messager.alert('ERROR', 'Ningún archivo fue subido', 'error');
+                break;                
+                case '6':
+                    $.messager.alert('ERROR', 'Missing a temporary folder', 'error');
+                break;
+                case '7':
+                    $.messager.alert('ERROR', 'El archivo no existe '+response, 'error');
+                break;
+                 case '8':
+                    $.messager.alert('ERROR', 'El archivo no existe '+response, 'error');
+                break;
+            }
+        },
+        'onUploadError': function(file, errorCode, errorMsg, errorString) {
+            $.messager.alert('ERROR', 'El archivo ' + file.name + ' no se pudo cargar', 'error');
+        },
+        'progressData' : 'percentage',        
+        'onUploadStart' : function(file) {
+            var r=confirm('Se remplazaran todo los datos del catalogo actuales por los que cotiene el archivo '+file.name+'  \u00BFDeseas continuar?');
+            if (r==false){
+                $('#file_upload_excel').uploadify('cancel');
+            }
+
+        },
+        'onUploadComplete' : function(file) {
+        	$.messager.show({
+                title:'Exito',
+                msg:'Procesamiento terminado del archivo: '+file.name,
+                showType:'fade',
+                style:{
+                    right:'',
+                    bottom:''
+                }
+            });
+            $('#dlg_file').dialog('close');        // close the dialog
+            $('#dg').datagrid('reload');
+        	            
+        },
+        'onCancel' : function(file) {
+            alert('El archivo ' + file.name + ' fue cancelado');
+        }
+    });
+});
+</script>

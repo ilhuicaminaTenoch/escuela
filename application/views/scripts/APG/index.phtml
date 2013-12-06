@@ -1,0 +1,379 @@
+<?php 
+$rutaImgane = Zend_Registry::get('config')->app->Imagenes;
+?>
+
+<div class="easyui-panel" fit="true" border="false" style="height:100%;overflow:hidden">
+    <div class="cart">
+		<div class="ctitle">Gurpo:
+			<select id="grupos" name="grupos" onchange="carga_tabla();">
+				<option value=''>selecciona...</option>;
+			<?php							
+				foreach($this->grupos as $grupo){
+					if($this->grupo == $grupo['id']){
+						echo"<option value='{$grupo['id']}' selected>{$grupo['nombre']}</option>";
+					}
+					echo"<option value='{$grupo['id']}'>{$grupo['nombre']}</option>";
+				}				
+			
+			?>
+			</select>
+		</div>
+        <div class="ctitle">Materias</div>
+        <div style="background:#fff" id="carga_tabla">
+			<table width="1163" border="1" cellspacing="3" cellpadding="3" fitColumns="true" id="horario">
+				<tr>
+					<th scope="col">HORAS</th>
+					<th scope="col">LUNES</th>
+					<th scope="col">MARTES</th>
+					<th scope="col">MIERCOLES</th>
+					<th scope="col">JUEVES</th>
+					<th scope="col">VIERNES</th>
+				</tr>
+				<?php 
+				if($this->validacion == 1){
+					foreach($this->datos as $hora){				
+						if($hora['hora'] == 'RECREO'){
+							echo"<tr style='background-color:#6293BB;color:#fff; text-align:center'>
+									<th colspan='6' scope='row'>RECREO</th>
+								</tr>";
+						}else{
+							echo"<tr data-idhora='{$hora['id_hora']}' id='hora_{$hora['id_hora']}'><th scope='row'>{$hora['hora']}</th>";
+							for($i=0; $i<=5; $i++){
+								if($i == 1) echo"<td data-dia='1' data-idhora='{$hora['id_hora']}' class='drop'></td>";
+								if($i == 2) echo"<td data-dia='2' data-idhora='{$hora['id_hora']}' class='drop'></td>";
+								if($i == 3) echo"<td data-dia='3' data-idhora='{$hora['id_hora']}' class='drop'></td>";
+								if($i == 4) echo"<td data-dia='4' data-idhora='{$hora['id_hora']}' class='drop'></td>";
+								if($i == 5) echo"<td data-dia='5' data-idhora='{$hora['id_hora']}' class='drop'></td>";
+							}
+						}				
+					}
+				}else{					
+					foreach($this->horas as $hora){
+						$contador=0;
+						if($hora['hora'] == 'RECREO'){
+							echo"<tr style='background-color:#6293BB;color:#fff; text-align:center'>
+									<th colspan='6' scope='row'>RECREO</th>
+								</tr>";
+						}else{											
+							echo"<tr data-idhora='{$hora['id_hora']}' id='hora_{$hora['id_hora']}'><th scope='row'>{$hora['hora']}</th>";							
+							foreach($this->datos as $dato){								
+								if($hora['hora'] == $dato['hora']){									
+									if($dato['materia']!=''){
+										echo"<td data-dia='{$dato['dia']}' data-idhora='{$hora['id_hora']}' class='drop droppable ocupado'>";
+										echo "<a href='#' class='drag assigned-materia easyui-tooltip' data-idprofesor='{$dato['id_profesor']}' data-idmateria='{$dato['id_materia']}' title='Profesor: {$dato['nombre_profesor']}' style='position: static; left: 25px; top: 16px;'>";
+										echo $dato['materia'];
+										echo"</a>";
+										echo"</td>";
+										$contador++;
+									}else{
+										echo"<td data-dia='{$dato['dia']}' data-idhora='{$hora['id_hora']}' class='drop'>";																				
+										echo"</td>";
+										$contador++;
+									}																
+								}
+							}							
+							$td_faltantes = 5-$contador;							
+							for($i=$td_faltantes; $i>=1; $i--){								
+								if($i == 1) echo"<td data-dia='5' data-idhora='{$hora['id_hora']}' class='drop'></td>";
+								if($i == 2) echo"<td data-dia='4' data-idhora='{$hora['id_hora']}' class='drop'></td>";
+								if($i == 3) echo"<td data-dia='3' data-idhora='{$hora['id_hora']}' class='drop'></td>";
+								if($i == 4) echo"<td data-dia='2' data-idhora='{$hora['id_hora']}' class='drop'></td>";
+								if($i == 5) echo"<td data-dia='1' data-idhora='{$hora['id_hora']}' class='drop'></td>";
+							}
+						}
+					}
+				}
+				?>
+			</table>
+        </div>
+        <div class="ctitle" id="respuesta" style="position:absolute;bottom:10px">Arrastra aqui la materia</div>
+		<div class="elimina"></div>
+		<div class="botonera">
+			<a class="easyui-linkbutton" data-options="iconCls:'icon-ok'" href="javascript:void(0)" onclick="genera_json()">Guardar</a>
+		</div>		
+	</div>
+    <div class="products">
+        <?php
+				$contador_profesores = 1;
+				$contador_materias = 1;
+				echo '<ul id="menu_arbol">';
+					foreach($this->arreglo as $llave_padres => $valor_padres){		
+						$separa= explode('_',$llave_padres);
+						if($contador_profesores == count($this->arreglo)){
+							echo "<li class='cierre' id='padre_{$separa[1]}'>";
+						}else{
+							echo "<li id='padre_{$separa[1]}'>";
+						}
+						echo "<a href='#'>{$separa[0]}</a>";
+						echo"<ul class='contenedor-hijos'>";
+						foreach($valor_padres as $hijos_llave => $hijos_valor){
+							if($contador_profesores > 1){
+								$contador_materias=1;					
+							}
+							if($contador_materias == count($valor_padres)){
+								echo"<li class='cierre'><a href='#' class='drag' data-idprofesor='{$separa[1]}' data-idmateria='{$hijos_valor['id_materia']}' title='Profesor: {$separa[0]}'>{$hijos_valor['nombre_materia']}</a></li>";	
+							}else{
+								echo"<li><a href='#' class='drag' data-idprofesor='{$separa[1]}' data-idmateria='{$hijos_valor['id_materia']}' title='Profesor: {$separa[0]}'>{$hijos_valor['nombre_materia']}</a></li>";					
+								
+							}
+							$contador_materias++;				
+						}
+						echo"</ul>";
+						echo "</li>";
+						$contador_profesores++;	
+					}
+				echo '</ul>';
+			?>
+		
+    </div>
+	
+	
+</div>
+<style type="text/css">
+	.products{
+		overflow:auto;
+		height:100%;
+		background:#fafafa;
+		width:183px;
+	}
+	.cart{
+		float:right;
+		position:relative;
+		width:1163px;
+		height:100%;
+		background:#ccc;
+		padding:0px 10px;
+	}
+	.ctitle{
+		text-align:center;
+		color:#555;
+		font-size:18px;
+		padding:10px;
+	}
+	
+	.cart .botonera{margin-top:30px;}
+	.elimina{
+		position:absolute;
+		width:150px;
+		height:150px;
+		background:url(<?php echo $rutaImgane.'/basura.jpg'?>) no-repeat scroll -133px 0 transparent;
+		top: 328px;
+		left: 622px;
+	}
+	.bote-rojo{
+		background-position:13px 0;
+	}
+</style>
+<script>
+$(function(){	
+	$('#menu_arbol ul').hide();
+	$('#menu_arbol a').click(function(){
+		$(this).next().slideToggle('fast');
+		return false;
+	});
+	
+	$('#menu_arbol li a.drag').draggable({
+		revert:true,
+		proxy:'clone',
+		onStartDrag:function(){
+			$(this).draggable('options').cursor = 'not-allowed';
+			$(this).draggable('proxy').css('z-index',10);
+		},
+		onStopDrag:function(){
+			$(this).draggable('options').cursor='move';
+		}
+	});
+	$('#horario td.drop a').draggable({
+		revert:true,
+		proxy:'clone',
+		onStartDrag:function(){
+			$(this).draggable('options').cursor = 'not-allowed';
+			$(this).draggable('proxy').css('z-index',10);
+		},
+		onStopDrag:function(){
+			$(this).draggable('options').cursor='move';
+		}
+	});	
+	$('#horario td.drop').droppable({
+		onDragEnter:function(e,source){			
+			$(source).draggable('options').cursor='auto';
+			$(this).addClass('over');			
+		},
+		onDragLeave:function(e,source){			
+			$(source).draggable('options').cursor='not-allowed';
+			$(this).removeClass('over');			
+		},
+		onDrop:function(e,source){
+			var id_grupo = $('#grupos').val();
+			var id_hora = $(this).data('idhora');
+			var dia = $(this).data('dia');
+			if ($(source).hasClass('assigned-materia')){
+				var id_profesor = $(source).data('idprofesor');
+				$(this).removeClass('over');				
+				$(this).append(source);	
+				checa_disponibilidad(id_profesor, id_grupo, id_hora, dia, this);
+				
+			}else{				
+				$(this).addClass('ocupado');
+				$(this).removeClass('over');				
+				var c = $(source).clone().addClass('assigned-materia');				
+				$(this).empty().append(c);
+				c.draggable({ revert:true });
+				var id_profesor = $(this).find('a').data('idprofesor');				
+				checa_disponibilidad(id_profesor, id_grupo, id_hora, dia, this);
+				
+			}
+		}
+	});
+	
+	$('.elimina').droppable({			            
+		onDragEnter:function(e,source){
+			$(source).draggable('options').cursor='auto';
+			$(this).addClass('bote-rojo');				
+		},
+		onDragLeave:function(){
+			$(source).draggable('options').cursor='not-allowed';
+			$(this).removeClass('bote-rojo');
+		},
+		onDrop:function(e,source){
+			if ($(source).hasClass('assigned-materia')){
+				$(this).removeClass('bote-rojo');
+				$(source).remove();			
+			}
+		}
+	});
+	
+});
+
+function checa_disponibilidad(id_profesor, id_grupo, id_hora, dia,elemeto_actual){	
+	$.ajax({
+		url: '<?php echo $this->url(array('controller' => 'APG', 'action' => 'checa'));?>',  
+		async:true,
+		data: 'id_profesor='+id_profesor+'&id_grupo='+id_grupo+'&id_hora='+id_hora+'&dia='+dia,
+		beforeSend: function(objeto){
+			$('#consola').html('Checando Disponibilidad...');
+			
+		},
+		success: function(datos) {			
+			$.each(datos, function(k,v){
+				if(v.validacion == 'error'){
+					bottomCenter('ATENCION',' En el grupo '+v.grupo+', de '+v.hora+' ya se encuentra asignado el profesor '+v.nombre);					
+					$(elemeto_actual).find('a').css('background','red');
+					$(elemeto_actual).empty();									
+				}else{					
+					$(elemeto_actual).find('a').css('background','#eaf2ff');
+				}
+			});						
+		},
+		contentType: "application/x-www-form-urlencoded",
+		dataType: "json",
+		error: function(objeto, quepaso, otroobj){
+			$('#consola').html('Estas viendo esto por que fallo la peticion y el error es el siguiente '+quepaso,'error');
+		},		
+		timeout: 3000,
+		type: "POST"
+	});
+}
+function bottomCenter(titulo,mensaje){
+	$.messager.show({
+		title:titulo,
+		msg:mensaje,
+		showType:'slide',
+		style:{
+			right:'',
+			top:'',
+			bottom:-document.body.scrollTop-document.documentElement.scrollTop
+		}
+	});
+}
+function showLoadingScreen(mensaje){   
+    $.blockUI({
+        title: 'ATENCION....',
+        message:  mensaje  
+    }); 
+}
+function carga_tabla(){
+	var id_grupo = $('#grupos').val();	
+	var firstPart = "<?php echo $this->url(array('controller' => 'APG', 'action' => 'index'));?>/?grupo=";
+	window.location.href = firstPart + id_grupo;	
+}
+function genera_json(){
+	var id_grupo=$('#grupos').val();	
+	if(id_grupo != ''){
+		var json='{';
+		json+='"grupos": [';
+		var contador = 1;	
+		$("table tr").each(function(index, value) {				
+			var id_hora = $(this).data('idhora');	
+			var total_materias_por_hora = $('#horario tr#hora_'+id_hora+' td.drop a').size();
+			if(typeof id_hora !='undefined'){			
+				if(total_materias_por_hora > 0){
+					$('#horario tr#hora_'+id_hora).addClass('assigned');
+				}else if(total_materias_por_hora == 0){
+					$('#horario tr#hora_'+id_hora).removeClass('assigned');
+				}
+			}
+		});
+		
+		var cuenta_asignado = $('.assigned').size();
+		
+		json+='{';
+		json+='"grupo":"'+id_grupo+'",';
+		json+='"horario": [';	
+		$("#horario tr").each(function(index, value){
+			var id_hora = $(this).data('idhora');	
+			var total_materias_por_hora = $('#horario tr#hora_'+id_hora+' td.drop a').size();
+			if(typeof $(this).data('idhora') != 'undefined'){
+				var id_hora = $(this).data('idhora');
+				if(total_materias_por_hora >0){					
+					json+='{';
+					json+='"hora":'+id_hora+',';
+					json+=' "dias": [';	
+					$('#horario tr#hora_'+id_hora+' td.drop').each(function(indice , valor){
+						var id_materia = $(this).find('a').data('idmateria');
+						var id_profesor = $(this).find('a').data('idprofesor');	
+						var dia = $(this).data('dia');
+						json+='{';
+						json+='"dia": "'+dia+'",';
+						json+='"materia": '+id_materia+',';
+						json+='"profesor": '+id_profesor;					
+						json+='},';					
+					});	
+					var longitud = json.length;
+					json =  json.slice(0,longitud-1);				
+					json+=']';	
+					if(contador < cuenta_asignado){
+						json +='},';
+					}else{
+						json +='}';
+					}
+					contador++;
+				}
+			}
+		});
+		json +=']}]}';
+		//console.log(json);	
+		$.ajax({
+		url: '<?php echo $this->url(array('controller' => 'APG', 'action' => 'guarda'));?>',  
+		async:true,
+		data: 'cadena='+json+'&grupo='+id_grupo,
+		beforeSend: function(objeto){
+			showLoadingScreen('Enviando Datos');
+			
+		},
+		complete: function(objeto, exito){				
+			$.unblockUI();
+		},
+		contentType: "application/x-www-form-urlencoded",
+		dataType: "html",
+		error: function(objeto, quepaso, otroobj){
+			showLoadingScreen('Estas viendo esto por que fallo la peticion y el error es el siguiente '+quepaso,'error');
+		},		
+		timeout: 3000,
+		type: "POST"
+	});
+	}else{
+		alert('Selecciona un grupo...');
+	}
+}
+</script>
