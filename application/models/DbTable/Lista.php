@@ -43,4 +43,101 @@ class Application_Model_DbTable_Lista extends Zend_Db_Table_Abstract {
 		return $mensaje;
 	
 	}
+	
+	public function forma_json_property_grid($id_escuela,$id_datos_personales, $id_materia){
+		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
+		$query_datos_escuela="SELECT 
+								tbl_escuela.nombre_escuela,
+								tbl_escuela.clave,
+								tbl_escuela.zona,
+								tbl_escuela.sector,
+								tbl_escuela.calle,
+								tbl_codigo_postal.colonia,
+								tbl_codigo_postal.localidad,
+								tbl_codigo_postal.municipio,
+								tbl_codigo_postal.codigo_postal as cp
+								FROM
+									tbl_escuela,tbl_codigo_postal
+								WHERE
+									id_escuela = '$id_escuela' AND 
+									tbl_codigo_postal.id_codigo_postal= tbl_escuela.id_codigo_postal";
+		$query_datos_grupo="SELECT tb_apg.id_materia, tb_materias.materia, tb_grupo.S_GRUPO
+							FROM tb_apg ,tb_grupo ,tb_profesor ,tb_datos_generales ,tb_materias
+							WHERE tb_apg.id_grupo = tb_grupo.N_ID_GRUPO AND tb_profesor.N_DATOS_PERSONALES = tb_datos_generales.N_DATOS_PERSONALES AND 
+							tb_apg.id_materia = tb_materias.id AND tb_apg.id_grupo = tb_grupo.N_ID_GRUPO AND tb_profesor.N_DATOS_PERSONALES =7 
+							AND tb_materias.id = '$id_materia'";
+		$query_datos_profesor="SELECT tb_datos_generales.S_NOMBRE FROM tb_datos_generales , tb_profesor
+							   WHERE tb_datos_generales.N_DATOS_PERSONALES = tb_profesor.N_DATOS_PERSONALES
+								AND tb_datos_generales.N_DATOS_PERSONALES= '$id_datos_personales'";
+		
+		$filas_escuela = $db->fetchAll($query_datos_escuela);
+		$filas_grupo = $db->fetchAll($query_datos_grupo);
+		$filas_profesor =$db->fetchAll($query_datos_profesor);
+		$array =[
+					"rows"=>array(
+								array(
+									"name"=>"Nombrela escuela",
+									"value"=>ucwords($filas_escuela[0]['nombre_escuela']),
+									"group"=>"Escuela"
+								),
+								array(
+									"name"=>"Clave",
+									"value"=>strtoupper($filas_escuela[0]['clave']),
+									"group"=>"Escuela"
+								),
+								array(
+									"name"=>"Zona",
+									"value"=>ucwords($filas_escuela[0]['zona']),
+									"group"=>"Escuela"
+								),								
+								array(
+									"name"=>"Sector",
+									"value"=>$filas_escuela[0]['sector'],
+									"group"=>"Escuela"
+								),
+								array(
+									"name"=>"Calle",
+									"value"=>ucwords($filas_escuela[0]['calle']),
+									"group"=>"Direccion"
+								),
+								array(
+									"name"=>"Colonia",
+									"value"=>ucwords($filas_escuela[0]['colonia']),
+									"group"=>"Direccion"
+								),
+								array(
+									"name"=>"Localidad",
+									"value"=>ucwords($filas_escuela[0]['localidad']),
+									"group"=>"Direccion"
+								),
+								array(
+									"name"=>"Municipio",
+									"value"=>ucwords($filas_escuela[0]['municipio']),
+									"group"=>"Direccion"
+								),
+								array(
+									"name"=>"Codigo postal",
+									"value"=>$filas_escuela[0]['cp'],
+									"group"=>"Direccion"
+								),
+								array(
+									"name"=>"Nombre del profesor",
+									"value"=>ucwords($filas_profesor[0]['S_NOMBRE']),
+									"group"=>"Profesor"
+								),
+								array(
+									"name"=>"Grado y Grupo",
+									"value"=>$filas_grupo[0]['S_GRUPO'],
+									"group"=>"Profesor"
+								),
+								array(
+									"name"=>"Materia",
+									"value"=>$filas_grupo[0]['materia'],
+									"group"=>"Profesor"
+								)
+							)
+				];
+		return $array;
+		
+	}
 }
