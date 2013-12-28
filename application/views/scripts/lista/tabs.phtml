@@ -4,7 +4,7 @@ $rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
 <div id="tabs" class="easyui-tabs" style="width:740px;height:540px">			
 	<div title="Datos escuela" style="padding:10px" id="datosEscuela">		
 		<table id="pg" class="easyui-propertygrid" style="width:600px"
-			data-options="url:'<?php echo $this->url(array('controller'=>'Lista','action'=>'propertygrid'));//echo $rutaPublica.'propertygrid_data.json';?>',showGroup:true,scrollbarSize:0">
+			data-options="url:'<?php echo $this->url(array('controller'=>'Lista','action'=>'propertygrid'));?>',showGroup:true,scrollbarSize:0">
 		</table>
 	</div>
 	<div title="Lista de control" style="padding:10px" id="listaControl">
@@ -20,10 +20,93 @@ $rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
 
 	</div>
 	<div title="Bimestres" style="padding:10px">
-		
+		<table id="dgCalificaciones" class="easyui-datagrid" title="Column Group" style="width:700px;height:250px"
+            data-options="rownumbers:true,
+						  singleSelect:true,
+						  url:'<?php echo $rutaPublica.'calificaciones_data.json';?>',
+						  method:'get'">
+			<thead data-options="frozen:true">
+				<tr>
+					<th data-options="field:'nombre',width:180">Nombre</th>					
+				</tr>
+			
+			</thead>
+			<thead>			
+				<tr>									
+					<th field="bloque1" width="80" align="center" editor="{type:'numberbox',options:{precision:1}}">SEP - OCT</th>
+					<th field="bloque2" width="80" align="center" editor="{type:'numberbox',options:{precision:1}}">NOV - DIC</th>
+					<th field="bloque3" width="80" align="center" editor="{type:'numberbox',options:{precision:1}}">ENE - FEB</th>
+					<th field="bloque4" width="80" align="center" editor="{type:'numberbox',options:{precision:1}}">MRZ - ABR</th>
+					<th field="bloque5" width="150" align="center" editor="{type:'numberbox',options:{precision:1}}">MYO - JNO - JLO</th>					
+					<th field="promedio" width="80" align="center" editor="{type:'numberbox',options:{precision:2}}">PROMEDIO</th>
+				</tr>				
+			</thead>
+		</table>
+		<a id="btn_guarda" href="#" class="easyui-linkbutton" data-options="iconCls:'icon-save'">Guardar</a>
+		<script type="text/javascript">
+        $.extend($.fn.datagrid.methods, {
+            editCell: function(jq,param){
+                return jq.each(function(){
+                    var opts = $(this).datagrid('options');
+                    var fields = $(this).datagrid('getColumnFields',true).concat($(this).datagrid('getColumnFields'));
+                    for(var i=0; i<fields.length; i++){
+                        var col = $(this).datagrid('getColumnOption', fields[i]);
+                        col.editor1 = col.editor;
+                        if (fields[i] != param.field){
+                            col.editor = null;
+                        }
+                    }
+                    $(this).datagrid('beginEdit', param.index);
+                    for(var i=0; i<fields.length; i++){
+                        var col = $(this).datagrid('getColumnOption', fields[i]);
+                        col.editor = col.editor1;
+                    }
+                });
+            }
+        });
+        var lastIndex;
+		$('#dgCalificaciones').datagrid({
+			onClickRow:function(rowIndex){
+				if (lastIndex != rowIndex){
+					$('#dgCalificaciones').datagrid('endEdit', lastIndex);
+					$('#dgCalificaciones').datagrid('beginEdit', rowIndex);
+					setEditing(rowIndex);
+				}
+				lastIndex = rowIndex;
+			}
+		});
+		function setEditing(rowIndex){
+			var bloques = $('#dgCalificaciones').datagrid('getEditors', rowIndex);
+			var bloque1Editor = bloques[0], bloque2Editor = bloques[1], bloque3Editor = bloques[2], 
+						        bloque4Editor = bloques[3], bloque5Editor = bloques[4], 
+								promedioEditor = bloques[5];
+			
+			bloque1Editor.target.bind('change', function(){
+				calculate();
+			});
+			bloque2Editor.target.bind('change', function(){
+				calculate();
+			});
+			bloque3Editor.target.bind('change', function(){
+				calculate();
+			});
+			bloque4Editor.target.bind('change', function(){
+				calculate();
+			});
+			bloque5Editor.target.bind('change', function(){
+				calculate();
+			});
+			function calculate(){
+				var suma = parseFloat(bloque1Editor.target.val()) + parseFloat(bloque2Editor.target.val()) + parseFloat(bloque3Editor.target.val()) + parseFloat(bloque4Editor.target.val()) + parseFloat(bloque5Editor.target.val());
+				var promedio = parseFloat(suma/5);
+				$(promedioEditor.target).numberbox('setValue',promedio);				
+			}
+		}       
+    </script>
 	</div>
 </div>
-<script type="text/javascript">		
+<script type="text/javascript">	
+$(document).ready(function() {	
 	$('#dg').datagrid({		
 		method:'get',
 		singleSelect:true,
@@ -36,4 +119,17 @@ $rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
 		remoteSort:false
 		 
 	});
+	$('#btn_guarda').bind('click', function(){       
+		var tabla_nombres = $('.datagrid-btable');
+		$(tabla_nombres).each(function(index,value){
+			var clase = '.datagrid-cell-c3-nombre';
+			var tr = $(this).find(clase).text();
+			var json='';
+			console.log(tr);
+		});
+		
+    });
+
+});
+
 </script>
