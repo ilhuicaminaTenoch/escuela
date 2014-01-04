@@ -23,11 +23,18 @@ $rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
 		<table id="dgCalificaciones" class="easyui-datagrid" title="Column Group" style="width:700px;height:250px"
             data-options="rownumbers:true,
 						  singleSelect:true,
-						  url:'<?php echo $rutaPublica.'calificaciones_data.json';?>',
-						  method:'get'">
+						  url:'<?php echo $this->url(array('controller'=>'Lista','action'=>'gridpromedio'))?>',
+						  method:'get',
+						  rowStyler: function(index,row){
+							if (row.promedio < 6){
+								return 'background-color:#FA5858;color:#fff;font-weight:bold;';
+							}
+						}
+						  ">
 			<thead data-options="frozen:true">
 				<tr>
-					<th data-options="field:'nombre',width:180">Nombre</th>					
+					<th data-options="field:'nombre_alumno',width:180">Nombre</th>
+					<th data-options="field:'matricula',width:100">Matricula</th>	
 				</tr>
 			
 			</thead>
@@ -119,17 +126,66 @@ $(document).ready(function() {
 		remoteSort:false
 		 
 	});
-	$('#btn_guarda').bind('click', function(){       
-		var tabla_nombres = $('.datagrid-btable');
-		$(tabla_nombres).each(function(index,value){
-			var clase = '.datagrid-cell-c3-nombre';
-			var tr = $(this).find(clase).text();
-			var json='';
-			console.log(tr);
-		});
+	$('#btn_guarda').bind('click', function(){
+		$('#dgCalificaciones').datagrid('endEdit', lastIndex);
+		var total_items = $(".datagrid-view1 > .datagrid-body > .datagrid-body-inner > .datagrid-btable > tbody > tr > td[field='nombre_alumno']").length;		
 		
+		var json ='';
+		json+='{ "rows": [';
+		for(i=0; i<total_items; i++){
+			json+='{';
+			$(".datagrid-view1 > .datagrid-body > .datagrid-body-inner > .datagrid-btable > tbody > tr#datagrid-row-r3-1-"+i+" > td[field]").each(function (indexnom, valuenom) {
+				if(indexnom == 0){
+					var nombre = $(this).text();
+					json+='"nombre":"'+nombre+'",';
+				}else{
+					var matricula = $(this).text();
+					json+='"matricula":"'+matricula+'",';
+				}			
+			});
+			$(".datagrid-view2 .datagrid-body > .datagrid-btable > tbody > tr#datagrid-row-r3-2-"+i+" td").each(function (index,value) {								
+				index++;
+				if(index < 6){
+					json+='"bloque'+index+'":'+parseFloat($(this).text())+',';			
+				}else{
+					json+='"promedio":'+parseFloat($(this).text());
+				}
+			});
+			
+			if(i < total_items-1){
+				json+='},';
+			}else{
+				json+='}';
+			}
+		}
+		json+=']}';	
+		//console.log(json);
+		$.ajax({
+			url: '<?php echo $this->url(array('controller' => 'Lista', 'action' => 'guarda'));?>',  
+			async:true,
+			data: 'cadena='+json,
+			beforeSend: function(objeto){
+				showLoadingScreen('Enviando Datos');
+				
+			},
+			complete: function(objeto, exito){				
+				$.unblockUI();
+			},
+			contentType: "application/x-www-form-urlencoded",
+			dataType: "html",
+			error: function(objeto, quepaso, otroobj){
+				showLoadingScreen('Estas viendo esto por que fallo la peticion y el error es el siguiente '+quepaso+' error');
+			},		
+			timeout: 3000,
+			type: "POST"
+		});	
     });
-
 });
+function showLoadingScreen(mensaje){   
+    $.blockUI({
+        title: 'ATENCION....',
+        message:  mensaje  
+    }); 
+}
 
 </script>

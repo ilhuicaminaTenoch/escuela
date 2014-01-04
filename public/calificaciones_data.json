@@ -1,104 +1,186 @@
 {
+    "total": 28,
     "rows": [
         {
-            "matricula": "FI-SW-01",
+            "productid": "FI-SW-01",
             "nombre": "Koi",
-            "bloque1": 0,
-            "bloque2": 0,
-            "bloque3": 0,
-            "bloque4": 0,
-            "bloque5": 0,
-			"promedio":0
+            "bloque1": 0.0,
+            "bloque2": 0.0,
+            "bloque3": 0.0,
+            "bloque4": 0.0,
+            "bloque5": 0.0
         },
         {
-            "matricula": "K9-DL-01",
+            "productid": "K9-DL-01",
             "nombre": "Dalmation",
-             "bloque1": 0,
-            "bloque2": 0,
-            "bloque3": 0,
-            "bloque4": 0,
-            "bloque5": 0,
-			"promedio":0
+            "bloque1": 0.0,
+            "bloque2": 0.0,
+            "bloque3": 0.0,
+            "bloque4": 0.0,
+            "bloque5": 0.0
         },
         {
-            "matricula": "RP-SN-01",
+            "productid": "RP-SN-01",
             "nombre": "Rattlesnake",
-             "bloque1": 0,
-            "bloque2": 0,
-            "bloque3": 0,
-            "bloque4": 0,
-            "bloque5": 0,
-			"promedio":0
+            "bloque1": 0.0,
+            "bloque2": 0.0,
+            "bloque3": 0.0,
+            "bloque4": 0.0,
+            "bloque5": 0.0
         },
         {
-            "matricula": "RP-SN-01",
+            "productid": "RP-SN-01",
             "nombre": "Rattlesnake",
-            "bloque1": 0,
-            "bloque2": 0,
-            "bloque3": 0,
-            "bloque4": 0,
-            "bloque5": 0,
-			"promedio": 0
+            "bloque1": 0.0,
+            "bloque2": 0.0,
+            "bloque3": 0.0,
+            "bloque4": 0.0,
+            "bloque5": 0.0
         },
         {
-            "matricula": "RP-LI-02",
+            "productid": "RP-LI-02",
             "nombre": "Iguana",
-             "bloque1": 0,
-            "bloque2": 0,
-            "bloque3": 0,
-            "bloque4": 0,
-            "bloque5": 0,
-			"promedio":0
+           "bloque1": 0.0,
+            "bloque2": 0.0,
+            "bloque3": 0.0,
+            "bloque4": 0.0,
+            "bloque5": 0.0
         },
         {
-            "matricula": "FL-DSH-01",
+            "productid": "FL-DSH-01",
+			"nombre": "Iguana",
+            "bloque1": 0.0,
+            "bloque2": 0.0,
+            "bloque3": 0.0,
+            "bloque4": 0.0,
+            "bloque5": 0.0
+        },
+        {
+            "productid": "FL-DSH-01",
             "nombre": "Manx",
-             "bloque1": 0,
-            "bloque2": 0,
-            "bloque3": 0,
-            "bloque4": 0,
-            "bloque5": 0,
-			"promedio":0
+            "bloque1": 0.0,
+            "bloque2": 0.0,
+            "bloque3": 0.0,
+            "bloque4": 0.0,
+            "bloque5": 0.0
         },
         {
-            "matricula": "FL-DSH-01",
-            "nombre": "Manx",
-             "bloque1": 0,
-            "bloque2": 0,
-            "bloque3": 0,
-            "bloque4": 0,
-            "bloque5": 0,
-			"promedio":0
+            "productid": "FL-DLH-02",
+			"nombre": "Iguana",
+            "bloque1": 0.0,
+            "bloque2": 0.0,
+            "bloque3": 0.0,
+            "bloque4": 0.0,
+            "bloque5": 0.0
         },
         {
-            "matricula": "FL-DLH-02",
+            "productid": "FL-DLH-02",
             "nombre": "Persian",
-             "bloque1": 0,
-            "bloque2": 0,
-            "bloque3": 0,
-            "bloque4": 0,
-            "bloque5": 0,
-			"promedio":0
+            "bloque1": 0.0,
+            "bloque2": 0.0,
+            "bloque3": 0.0,
+            "bloque4": 0.0,
+            "bloque5": 0.0
         },
         {
-            "matricula": "FL-DLH-02",
-            "nombre": "Persian",
-            "bloque1": 0,
-            "bloque2": 0,
-            "bloque3": 0,
-            "bloque4": 0,
-            "bloque5": 0,
-			"promedio":0
-        },
-        {
-            "matricula": "AV-CB-01",
+            "productid": "AV-CB-01",
             "nombre": "Amazon Parrot",
-            "bloque1": 0,
-            "bloque2": 0,
-            "bloque3": 0,
-            "bloque4": 0,
-            "bloque5": 0,
-			"promedio":0
+           "bloque1": 0.0,
+            "bloque2": 0.0,
+            "bloque3": 0.0,
+            "bloque4": 0.0,
+            "bloque5": 0.0
+        },
+		{
+            "productid": "FI-SW-01",
+            "nombre": "Koi",
+            "bloque1": 0.0,
+            "bloque2": 0.0,
+            "bloque3": 0.0,
+            "bloque4": 0.0,
+            "bloque5": 0.0
+        },
+        {
+            "productid": "K9-DL-01",
+            "nombre": "Dalmation",
+            "bloque1": 0.0,
+            "bloque2": 0.0,
+            "bloque3": 0.0,
+            "bloque4": 0.0,
+            "bloque5": 0.0
+        },
+        {
+            "productid": "RP-SN-01",
+            "nombre": "Rattlesnake",
+            "bloque1": 0.0,
+            "bloque2": 0.0,
+            "bloque3": 0.0,
+            "bloque4": 0.0,
+            "bloque5": 0.0
+        },
+        {
+            "productid": "RP-SN-01",
+            "nombre": "Rattlesnake",
+            "bloque1": 0.0,
+            "bloque2": 0.0,
+            "bloque3": 0.0,
+            "bloque4": 0.0,
+            "bloque5": 0.0
+        },
+        {
+            "productid": "RP-LI-02",
+            "nombre": "Iguana",
+            "bloque1": 0.0,
+            "bloque2": 0.0,
+            "bloque3": 0.0,
+            "bloque4": 0.0,
+            "bloque5": 0.0
+        },
+        {
+            "productid": "FL-DSH-01",
+            "nombre": "Manx",
+            "bloque1": 0.0,
+            "bloque2": 0.0,
+            "bloque3": 0.0,
+            "bloque4": 0.0,
+            "bloque5": 0.0
+        },
+        {
+            "productid": "FL-DSH-01",
+            "nombre": "Manx",
+            "bloque1": 0.0,
+            "bloque2": 0.0,
+            "bloque3": 0.0,
+            "bloque4": 0.0,
+            "bloque5": 0.0
+        },
+        {
+            "productid": "FL-DLH-02",
+            "nombre": "Persian",
+            "bloque1": 0.0,
+            "bloque2": 0.0,
+            "bloque3": 0.0,
+            "bloque4": 0.0,
+            "bloque5": 0.0
+        },
+        {
+            "productid": "FL-DLH-02",
+            "nombre": "Persian",
+            "bloque1": 0.0,
+            "bloque2": 0.0,
+            "bloque3": 0.0,
+            "bloque4": 0.0,
+            "bloque5": 0.0
+        },
+        {
+            "productid": "AV-CB-01",
+            "nombre": "Amazon Parrot",
+            "bloque1": 0.0,
+            "bloque2": 0.0,
+            "bloque3": 0.0,
+            "bloque4": 0.0,
+            "bloque5": 0.0
         }
+		
     ]
 }

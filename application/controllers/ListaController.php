@@ -54,6 +54,27 @@ class ListaController extends Application_Model_Filter
 		$session= new Zend_Session_Namespace('profesores');		
 		$session->idGrupo = $id_grupo;
 		$session->idMateria = $id_materia;
-		
+	}
+	
+	public function gridpromedioAction(){
+		$this->_helper->layout->disableLayout();
+		$this->getHelper("viewRenderer")->setNoRender();
+		$session= new Zend_Session_Namespace('profesores');		
+		$modelo = new Application_Model_DbTable_Lista();		
+		$grid_promedio = Zend_Json::encode($modelo->data_grid_promedio($session->idMateria,$session->idGrupo));
+		echo $grid_promedio = html_entity_decode($grid_promedio);
+	}
+	
+	public function guardaAction(){
+		$this->_helper->layout->disableLayout();
+		$this->getHelper("viewRenderer")->setNoRender();
+		$session= new Zend_Session_Namespace('profesores');
+		if ($this->getRequest()->isXmlHttpRequest()) {
+			$_POST = $this->filter->process($_POST);
+			$json=$this->sql_command($_POST['cadena']);
+			$arreglo = Zend_Json::decode($json);
+			$modelo = new Application_Model_DbTable_Lista();
+			$guarda = $modelo->guarda_datos($arreglo, $session->idGrupo, $session->idMateria);
+		}
 	}
 }

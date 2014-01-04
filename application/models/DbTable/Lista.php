@@ -140,4 +140,26 @@ class Application_Model_DbTable_Lista extends Zend_Db_Table_Abstract {
 		return $array;
 		
 	}
+	
+	public function data_grid_promedio($id_materia,$id_grupo){
+		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
+		$SP ="CALL valida_promedio($id_grupo,$id_materia);";
+		$ejecuta = $db->fetchAll($SP);		
+		return $ejecuta;
+	}
+	
+	public function guarda_datos($json, $id_grupo, $id_materia){
+		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
+		$elimina = "DELETE FROM tb_promedio WHERE N_ID_GRUPO = '$id_grupo'";
+		$ejecuta_elimina = $db->query($elimina);
+		$inserta="";
+		$inserta.= "INSERT INTO tb_promedio(S_MATRICULA,bloque1,bloque2,bloque3,bloque4,bloque5,promedio,N_ID_GRUPO,id_materia) VALUES";		
+		foreach($json as $llave_principal => $valor_principal){
+			foreach($valor_principal as $llave => $valor){
+				$inserta.="('{$valor['matricula']}','{$valor['bloque1']}','{$valor['bloque2']}','{$valor['bloque3']}','{$valor['bloque4']}','{$valor['bloque5']}','{$valor['promedio']}','$id_grupo','$id_materia'),";
+			}
+		}
+		$cadena = trim($inserta, ',');		
+		$ejecuta_inserta = $db->query($cadena);
+	}
 }
