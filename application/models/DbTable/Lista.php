@@ -143,14 +143,31 @@ class Application_Model_DbTable_Lista extends Zend_Db_Table_Abstract {
 	
 	public function data_grid_promedio($id_materia,$id_grupo){
 		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
-		$SP ="CALL valida_promedio($id_grupo,$id_materia);";
+		$SP ="SELECT
+				tb_forma_calificar.S_CONCEPTO as concepto,
+				tb_forma_calificar.N_PORCENTAJE as porcentaje,
+				tb_datos_generales.S_NOMBRE as nombre_alumno,
+				tb_datos_generales.S_MATRICULA as matricula
+				FROM
+				tb_datos_generales ,
+				tb_grupo ,
+				tb_materias ,
+				tb_forma_calificar
+				WHERE
+				tb_datos_generales.S_MATRICULA = tb_forma_calificar.S_MATRICULA AND
+				tb_forma_calificar.N_ID_GRUPO = tb_grupo.N_ID_GRUPO AND
+				tb_forma_calificar.N_ID_MATERIA = tb_materias.id AND
+				tb_grupo.N_ID_GRUPO = $id_grupo AND
+				tb_materias.id = $id_materia
+				GROUP BY matricula 
+				ORDER BY nombre_alumno";//"CALL valida_promedio($id_grupo,$id_materia);";
 		$ejecuta = $db->fetchAll($SP);		
 		return $ejecuta;
 	}
 	
 	public function guarda_datos($json, $id_grupo, $id_materia){
 		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
-		$elimina = "DELETE FROM tb_promedio WHERE N_ID_GRUPO = '$id_grupo'";
+		$elimina = "DELETE FROM tb_promedio WHERE N_ID_GRUPO = '$id_grupo' AND id_materia = '$id_materia'";
 		$ejecuta_elimina = $db->query($elimina);
 		$inserta="";
 		$inserta.= "INSERT INTO tb_promedio(S_MATRICULA,bloque1,bloque2,bloque3,bloque4,bloque5,promedio,N_ID_GRUPO,id_materia) VALUES";		
@@ -161,5 +178,14 @@ class Application_Model_DbTable_Lista extends Zend_Db_Table_Abstract {
 		}
 		$cadena = trim($inserta, ',');		
 		$ejecuta_inserta = $db->query($cadena);
+	}
+	
+	public function filas_conceptos($id_grupo,$id_materia){
+		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
+		$query = "SELECT S_CONCEPTO as concepto, N_PORCENTAJE as porcentaje
+				  FROM tb_forma_calificar 
+				  WHERE N_ID_MATERIA = $id_materia AND N_ID_GRUPO = $id_grupo";
+		$ejecuta = $db->fetchAll($query);
+		return $ejecuta;
 	}
 }

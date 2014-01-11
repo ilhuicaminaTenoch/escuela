@@ -53,7 +53,12 @@ class ListaController extends Application_Model_Filter
 		$id_materia =addslashes($this->entityFilter->filter($this->sql_command($_GET['id_materia'])));
 		$session= new Zend_Session_Namespace('profesores');		
 		$session->idGrupo = $id_grupo;
-		$session->idMateria = $id_materia;
+		$session->idMateria = $id_materia;		
+		
+		
+		$modelo = new Application_Model_DbTable_Lista();
+		$titulo_tabla = $modelo->filas_conceptos($session->idGrupo,$session->idMateria);
+		$this->view->titulos = $titulo_tabla;
 	}
 	
 	public function gridpromedioAction(){
@@ -77,4 +82,5 @@ class ListaController extends Application_Model_Filter
 			$guarda = $modelo->guarda_datos($arreglo, $session->idGrupo, $session->idMateria);
 		}
 	}
+	
 }

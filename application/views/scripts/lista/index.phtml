@@ -47,5 +47,7 @@ $url = Zend_Registry::get('config')->app->baseUrl;
 	});
 	function carga_alumnos(id_grupo,id_materia){		
 		$('#contenedorTabs').html('<iframe width="775" height="560" scrolling="No" frameborder="0" name="control" id="control" allowtransparency="true" src="<?php echo $this->url(array('controler'=>'Lista','action'=>'tabs'));?>?id_grupo='+id_grupo+'&id_materia='+id_materia+'"></iframe>');
-	}
+	}	
+	
+
 </script>

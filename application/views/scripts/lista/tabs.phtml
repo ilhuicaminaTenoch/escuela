@@ -17,38 +17,34 @@ $rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
 				</tr>
 			</thead>
 		</table>
-
 	</div>
 	<div title="Bimestres" style="padding:10px">
-		<table id="dgCalificaciones" class="easyui-datagrid" title="Column Group" style="width:700px;height:250px"
-            data-options="rownumbers:true,
-						  singleSelect:true,
-						  url:'<?php echo $this->url(array('controller'=>'Lista','action'=>'gridpromedio'))?>',
-						  method:'get',
-						  rowStyler: function(index,row){
+		<table id="dgCalificaciones" class="easyui-datagrid" title="Segumiento de calificaciones" style="width:700px;height:250px"
+				data-options="
+						rownumbers:true,
+						singleSelect:true,
+						url:'<?php echo $this->url(array('controller'=>'Lista','action'=>'gridpromedio'))?>',
+						method:'get',
+						rowStyler: function(index,row){
 							if (row.promedio < 6){
 								return 'background-color:#FA5858;color:#fff;font-weight:bold;';
 							}
-						}
-						  ">
+						},
+						onLoadSuccess:function(){alert('load ok')}
+						
+						">
 			<thead data-options="frozen:true">
+				<th data-options="field:'nombre_alumno',width:180">Nombre</th>
+				<th data-options="field:'matricula',width:100">Matricula</th>
+			</thead>
+			<thead>
 				<tr>
-					<th data-options="field:'nombre_alumno',width:180">Nombre</th>
-					<th data-options="field:'matricula',width:100">Matricula</th>	
+					<?php foreach($this->titulos as $concepto){?>
+					<th data-options="field:'<?php echo $concepto['concepto'].'-'.$concepto['porcentaje']; ?>',align:'center',width:150" editor="{type:'numberbox',options:{precision:1}}"><?php echo ucfirst($concepto['concepto']).' '.$concepto['porcentaje'].'%'; ?></th>					
+					<?php } ?>
 				</tr>
-			
 			</thead>
-			<thead>			
-				<tr>									
-					<th field="bloque1" width="80" align="center" editor="{type:'numberbox',options:{precision:1}}">SEP - OCT</th>
-					<th field="bloque2" width="80" align="center" editor="{type:'numberbox',options:{precision:1}}">NOV - DIC</th>
-					<th field="bloque3" width="80" align="center" editor="{type:'numberbox',options:{precision:1}}">ENE - FEB</th>
-					<th field="bloque4" width="80" align="center" editor="{type:'numberbox',options:{precision:1}}">MRZ - ABR</th>
-					<th field="bloque5" width="150" align="center" editor="{type:'numberbox',options:{precision:1}}">MYO - JNO - JLO</th>					
-					<th field="promedio" width="80" align="center" editor="{type:'numberbox',options:{precision:2}}">PROMEDIO</th>
-				</tr>				
-			</thead>
-		</table>
+		</table>		
 		<a id="btn_guarda" href="#" class="easyui-linkbutton" data-options="iconCls:'icon-save'">Guardar</a>
 		<script type="text/javascript">
         $.extend($.fn.datagrid.methods, {
@@ -80,35 +76,44 @@ $rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
 					setEditing(rowIndex);
 				}
 				lastIndex = rowIndex;
-			}
+			}			
 		});
 		function setEditing(rowIndex){
-			var bloques = $('#dgCalificaciones').datagrid('getEditors', rowIndex);
-			var bloque1Editor = bloques[0], bloque2Editor = bloques[1], bloque3Editor = bloques[2], 
-						        bloque4Editor = bloques[3], bloque5Editor = bloques[4], 
-								promedioEditor = bloques[5];
-			
-			bloque1Editor.target.bind('change', function(){
-				calculate();
-			});
-			bloque2Editor.target.bind('change', function(){
-				calculate();
-			});
-			bloque3Editor.target.bind('change', function(){
-				calculate();
-			});
-			bloque4Editor.target.bind('change', function(){
-				calculate();
-			});
-			bloque5Editor.target.bind('change', function(){
-				calculate();
-			});
-			function calculate(){
-				var suma = parseFloat(bloque1Editor.target.val()) + parseFloat(bloque2Editor.target.val()) + parseFloat(bloque3Editor.target.val()) + parseFloat(bloque4Editor.target.val()) + parseFloat(bloque5Editor.target.val());
-				var promedio = parseFloat(suma/5);
-				$(promedioEditor.target).numberbox('setValue',promedio);				
+			var editor = $('#dgCalificaciones').datagrid('getEditors', rowIndex);
+			var contador = 1;
+			var total_editor = editor.length;
+			for(i = 0; i<total_editor; i++){
+				if(contador < total_editor){					
+					window['nota'+contador+'Editor']= editor[i];				
+					window['nota'+contador+'Editor'].target.bind('change', function(){
+						calculate();
+					});			
+				}
+				if(contador == total_editor){
+					var calificacionEditor = editor[i];
+				}
+				contador++;	
+			}			
+			function calculate(){				
+				var suma = 0;
+				var contador = 1;
+				for(i = 0; i<total_editor; i++){
+					if(contador < total_editor){
+						window['nota'+contador+'Editor']= editor[i]; 
+						if(window['nota'+contador+'Editor'].target.val() != ''){
+							suma = suma + parseFloat(window['nota'+contador+'Editor'].target.val());						
+						}
+					}
+					if(contador == total_editor){
+						var calificacionEditor = editor[i];
+					}
+					contador++;
+				}				
+				$(calificacionEditor.target).numberbox('setValue',suma);
 			}
-		}       
+		}
+		
+
     </script>
 	</div>
 </div>
@@ -126,7 +131,7 @@ $(document).ready(function() {
 		remoteSort:false
 		 
 	});
-	$('#btn_guarda').bind('click', function(){
+	/*$('#btn_guarda').bind('click', function(){
 		$('#dgCalificaciones').datagrid('endEdit', lastIndex);
 		var total_items = $(".datagrid-view1 > .datagrid-body > .datagrid-body-inner > .datagrid-btable > tbody > tr > td[field='nombre_alumno']").length;		
 		
@@ -144,12 +149,9 @@ $(document).ready(function() {
 				}			
 			});
 			$(".datagrid-view2 .datagrid-body > .datagrid-btable > tbody > tr#datagrid-row-r3-2-"+i+" td").each(function (index,value) {								
-				index++;
-				if(index < 6){
-					json+='"bloque'+index+'":'+parseFloat($(this).text())+',';			
-				}else{
-					json+='"promedio":'+parseFloat($(this).text());
-				}
+				index++;				
+				json+='"nota'+index+'":'+parseFloat($(this).text())+',';			
+				
 			});
 			
 			if(i < total_items-1){
@@ -159,8 +161,8 @@ $(document).ready(function() {
 			}
 		}
 		json+=']}';	
-		//console.log(json);
-		$.ajax({
+		console.log(json);
+		/*$.ajax({
 			url: '<?php echo $this->url(array('controller' => 'Lista', 'action' => 'guarda'));?>',  
 			async:true,
 			data: 'cadena='+json,
@@ -178,8 +180,9 @@ $(document).ready(function() {
 			},		
 			timeout: 3000,
 			type: "POST"
-		});	
-    });
+		});
+    });*/
+	
 });
 function showLoadingScreen(mensaje){   
     $.blockUI({
@@ -187,5 +190,4 @@ function showLoadingScreen(mensaje){
         message:  mensaje  
     }); 
 }
-
 </script>
