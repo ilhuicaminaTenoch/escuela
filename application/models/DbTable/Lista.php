@@ -160,24 +160,34 @@ class Application_Model_DbTable_Lista extends Zend_Db_Table_Abstract {
 				tb_grupo.N_ID_GRUPO = $id_grupo AND
 				tb_materias.id = $id_materia
 				GROUP BY matricula 
-				ORDER BY nombre_alumno";//"CALL valida_promedio($id_grupo,$id_materia);";
+				ORDER BY nombre_alumno";//"CALL valida_promedio($id_grupo,$id_materia);";		
 		$ejecuta = $db->fetchAll($SP);		
 		return $ejecuta;
 	}
 	
 	public function guarda_datos($json, $id_grupo, $id_materia){
 		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
-		$elimina = "DELETE FROM tb_promedio WHERE N_ID_GRUPO = '$id_grupo' AND id_materia = '$id_materia'";
+		$cuenta_notas = "SELECT COUNT(*) total_notas
+				  FROM tb_forma_calificar 
+				  WHERE N_ID_MATERIA = $id_materia AND N_ID_GRUPO = $id_grupo";
+		$ejecuta = $db->fetchAll($cuenta_notas);
+		$numeroDeNotas = $ejecuta[0][total_notas];
+		$elimina = "DELETE FROM tb_notas,tb_forma_calificar WHERE tb_notas.S_MATRICULA = tb_forma_calificar.S_MATRICULA and tb_forma_calificar.N_ID_GRUPO = '$id_grupo' and tb_forma_calificar.N_ID_MATERIA = '$id_materia'";
+		for($i = 1; $i<$numeroDeNotas; $i++){
+			
+		}
+		/*
 		$ejecuta_elimina = $db->query($elimina);
 		$inserta="";
 		$inserta.= "INSERT INTO tb_promedio(S_MATRICULA,bloque1,bloque2,bloque3,bloque4,bloque5,promedio,N_ID_GRUPO,id_materia) VALUES";		
 		foreach($json as $llave_principal => $valor_principal){
 			foreach($valor_principal as $llave => $valor){
-				$inserta.="('{$valor['matricula']}','{$valor['bloque1']}','{$valor['bloque2']}','{$valor['bloque3']}','{$valor['bloque4']}','{$valor['bloque5']}','{$valor['promedio']}','$id_grupo','$id_materia'),";
+				$inserta.="('{$valor['matricula']}','{$valor['nota1']}','{$valor['nota2']}','{$valor['nota3']}','{$valor['nota4']}','{$valor['nota5']}','{$valor['nota']}','$id_grupo','$id_materia'),";
 			}
 		}
-		$cadena = trim($inserta, ',');		
-		$ejecuta_inserta = $db->query($cadena);
+		$cadena = trim($inserta, ',');*/
+		echo $cadena;
+		//$ejecuta_inserta = $db->query($cadena);
 	}
 	
 	public function filas_conceptos($id_grupo,$id_materia){
@@ -187,5 +197,14 @@ class Application_Model_DbTable_Lista extends Zend_Db_Table_Abstract {
 				  WHERE N_ID_MATERIA = $id_materia AND N_ID_GRUPO = $id_grupo";
 		$ejecuta = $db->fetchAll($query);
 		return $ejecuta;
+	}
+	
+	public function numero_de_titulos($id_grupo,$id_materia){
+		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
+		$query = "SELECT COUNT(*) AS total
+				  FROM tb_forma_calificar 
+				  WHERE N_ID_MATERIA = $id_materia AND N_ID_GRUPO = $id_grupo";
+		$ejecuta = $db->fetchAll($query);
+		return $ejecuta[0]['total'];
 	}
 }

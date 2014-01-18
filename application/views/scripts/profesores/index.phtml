@@ -56,5 +56,10 @@
     function doSearch() {
         $('#dg').datagrid('load', {Snombre: $('#Snombre').val()});
     }
-    
+    var pager = $('#dg').datagrid('getPager');
+	pager.pagination({
+		displayMsg: 'Mostrando {from} a {to} de {total} elementos',
+			beforePageText: 'Paginas',
+			afterPageText: ' de {pages}'
+	});
 </script>

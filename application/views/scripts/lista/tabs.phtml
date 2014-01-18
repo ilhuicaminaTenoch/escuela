@@ -22,7 +22,7 @@ $rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
 		<table id="dgCalificaciones" class="easyui-datagrid" title="Segumiento de calificaciones" style="width:700px;height:250px"
 				data-options="
 						rownumbers:true,
-						singleSelect:true,
+						singleSelect:true,						
 						url:'<?php echo $this->url(array('controller'=>'Lista','action'=>'gridpromedio'))?>',
 						method:'get',
 						rowStyler: function(index,row){
@@ -30,8 +30,14 @@ $rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
 								return 'background-color:#FA5858;color:#fff;font-weight:bold;';
 							}
 						},
-						onLoadSuccess:function(){alert('load ok')}
-						
+						onClickRow:function(rowIndex){
+							if (lastIndex != rowIndex){
+								$('#dgCalificaciones').datagrid('endEdit', lastIndex);
+								$('#dgCalificaciones').datagrid('beginEdit', rowIndex);
+								setEditing(rowIndex);
+							}
+							lastIndex = rowIndex;
+						}				
 						">
 			<thead data-options="frozen:true">
 				<th data-options="field:'nombre_alumno',width:180">Nombre</th>
@@ -67,22 +73,12 @@ $rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
                 });
             }
         });
-        var lastIndex;
-		$('#dgCalificaciones').datagrid({
-			onClickRow:function(rowIndex){
-				if (lastIndex != rowIndex){
-					$('#dgCalificaciones').datagrid('endEdit', lastIndex);
-					$('#dgCalificaciones').datagrid('beginEdit', rowIndex);
-					setEditing(rowIndex);
-				}
-				lastIndex = rowIndex;
-			}			
-		});
+        var lastIndex;		
 		function setEditing(rowIndex){
 			var editor = $('#dgCalificaciones').datagrid('getEditors', rowIndex);
-			var contador = 1;
+			var contador = 1;			
 			var total_editor = editor.length;
-			for(i = 0; i<total_editor; i++){
+			for(i = 0; i<total_editor; i++){				
 				if(contador < total_editor){					
 					window['nota'+contador+'Editor']= editor[i];				
 					window['nota'+contador+'Editor'].target.bind('change', function(){
@@ -94,15 +90,19 @@ $rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
 				}
 				contador++;	
 			}			
-			function calculate(){				
-				var suma = 0;
+			function calculate(){								
+				var suma = 0, total = 0;
 				var contador = 1;
-				for(i = 0; i<total_editor; i++){
+				for(i = 0; i<total_editor; i++){					
 					if(contador < total_editor){
 						window['nota'+contador+'Editor']= editor[i]; 
 						if(window['nota'+contador+'Editor'].target.val() != ''){
-							suma = suma + parseFloat(window['nota'+contador+'Editor'].target.val());						
-						}
+							selector = $("#datagrid-row-r2-2-0 td[field]:eq("+i+")");
+							campo = selector.attr("field");
+							separa = campo.split("-");
+							porcentaje = parseFloat(separa[1]);
+							suma = suma + (parseFloat(window['nota'+contador+'Editor'].target.val())) * (porcentaje);							
+						}	
 					}
 					if(contador == total_editor){
 						var calificacionEditor = editor[i];
@@ -112,9 +112,7 @@ $rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
 				$(calificacionEditor.target).numberbox('setValue',suma);
 			}
 		}
-		
-
-    </script>
+	</script>
 	</div>
 </div>
 <script type="text/javascript">	
@@ -131,15 +129,15 @@ $(document).ready(function() {
 		remoteSort:false
 		 
 	});
-	/*$('#btn_guarda').bind('click', function(){
+	$('#btn_guarda').bind('click', function(){
 		$('#dgCalificaciones').datagrid('endEdit', lastIndex);
 		var total_items = $(".datagrid-view1 > .datagrid-body > .datagrid-body-inner > .datagrid-btable > tbody > tr > td[field='nombre_alumno']").length;		
-		
+		var totalNotas = $("#datagrid-row-r2-2-0 > td").length;		
 		var json ='';
 		json+='{ "rows": [';
 		for(i=0; i<total_items; i++){
 			json+='{';
-			$(".datagrid-view1 > .datagrid-body > .datagrid-body-inner > .datagrid-btable > tbody > tr#datagrid-row-r3-1-"+i+" > td[field]").each(function (indexnom, valuenom) {
+			$("tr#datagrid-row-r2-1-"+i+" > td[field]").each(function (indexnom, valuenom) {
 				if(indexnom == 0){
 					var nombre = $(this).text();
 					json+='"nombre":"'+nombre+'",';
@@ -148,10 +146,22 @@ $(document).ready(function() {
 					json+='"matricula":"'+matricula+'",';
 				}			
 			});
-			$(".datagrid-view2 .datagrid-body > .datagrid-btable > tbody > tr#datagrid-row-r3-2-"+i+" td").each(function (index,value) {								
-				index++;				
-				json+='"nota'+index+'":'+parseFloat($(this).text())+',';			
-				
+			$("tr#datagrid-row-r2-2-"+i+" td").each(function (index,value) {								
+				index++;
+				var valor = parseFloat($(this).text());
+				if(isNaN(valor)){					
+					if(index < totalNotas){
+						json+='"nota'+index+'":0,';			
+					}else{
+						json+='"nota'+index+'":0';
+					}
+				}else{
+					if(index < totalNotas){
+						json+='"nota'+index+'":'+valor+',';			
+					}else{
+						json+='"nota'+index+'":'+valor;
+					}
+				}
 			});
 			
 			if(i < total_items-1){
@@ -161,8 +171,8 @@ $(document).ready(function() {
 			}
 		}
 		json+=']}';	
-		console.log(json);
-		/*$.ajax({
+		//console.log(json);
+		$.ajax({
 			url: '<?php echo $this->url(array('controller' => 'Lista', 'action' => 'guarda'));?>',  
 			async:true,
 			data: 'cadena='+json,
@@ -181,7 +191,7 @@ $(document).ready(function() {
 			timeout: 3000,
 			type: "POST"
 		});
-    });*/
+    });
 	
 });
 function showLoadingScreen(mensaje){   

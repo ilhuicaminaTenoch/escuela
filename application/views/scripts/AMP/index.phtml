@@ -77,10 +77,7 @@ $total_materias = count($this->materias);
 	<a href="#" id="save" class="easyui-linkbutton" onclick="guardar();" iconCls="icon-save" style="margin-top: 10px;">Guardar</a>  
 	<div class="elimina"></div>
 	</div>
-<script>
-	$(document).ready(function() {
-		//$('body').attr('onLoad','carga_json()');		
-	});	
+<script>	
 	function carga_json(){
 		var base_url='<?php echo $rutaPublica?>AsignacionesProfesorMaterias.json';
 		var total_materias = $("#total_materias").val();		
@@ -97,16 +94,14 @@ $total_materias = count($this->materias);
 				$.each(profesor.materias, function(llave, materia) {				
 					output+='<td class="drop droppable">';
 					output+='<li data-materia="'+materia.id+'" data-nombremateria="'+materia.nombre+'" style="position: static; left: 204.5px; top: 8px;" class="assigned">'+materia.nombre+'</li>';
-					output+='</td>';
+					output+='</td>';				
 					
-					
-					//contador++;
 				});
 				output+='</tr>';
 				output+='</tbody>';
 				
 			});
-			//$('#asignaciones').html(output);
+			
 		});		
 	}
 	function guardar(){		
@@ -152,8 +147,7 @@ $total_materias = count($this->materias);
 				}
 			}
 		});
-		json +='}';
-		//console.log(json);		
+		json +='}';		
 		$.ajax({
 			url: '<?php echo $this->url(array('controller' => 'AMP', 'action' => 'guarda'));?>',  
 			async:true,
@@ -217,10 +211,7 @@ $total_materias = count($this->materias);
 				$(this).removeClass('over');				
 			},
 			onDrop:function(e,source){
-				/*Valida que no haya materias iguales
-				$("table tr").each(function(index, value) {	
-				})
-				Fin validacion*/
+				
 				if ($(source).hasClass('assigned')){							
 					$(this).removeClass('over');					
 					$(this).append(source);				

@@ -10,17 +10,12 @@
 				->appendStylesheet($this->baseUrl().'/css/themes/default/easyui.css')
 				->appendStylesheet($this->baseUrl().'/css/themes/icon.css')
 				->appendStylesheet($this->baseUrl().'/960/960.css')
-				->appendStylesheet($this->baseUrl().'/css/main.css');
-				//->appendStylesheet($this->baseUrl().'/jQuery-Validation-Engine-master/css/validationEngine.jquery.css');
-				
-				//->appendStylesheet('/css/forms.css', 'screen', 'IE'); // tambi�n podemos agregar css condicionales, por ejemplo para IE
+				->appendStylesheet($this->baseUrl().'/css/main.css');							
 			echo $this->headLink()."\n";
 			$this->headScript()->appendFile($this->baseUrl().'/jquery-ui-1.10.3.custom/js/jquery-1.9.1.js')
 				 ->headScript()->appendFile($this->baseUrl().'/js/src/jquery.easyui.min.js')
 				 ->headScript()->appendFile($this->baseUrl().'/js/jquery.blockUI.js')
-				 ->headScript()->appendFile($this->baseUrl().'/js/utilerias.js');				 
-				 //->headScript()->appendFile($this->baseUrl().'/jQuery-Validation-Engine-master/js/jquery.validationEngine.js')
-				 //->headScript()->appendFile($this->baseUrl().'/jQuery-Validation-Engine-master/js/languages/jquery.validationEngine-es.js');
+				 ->headScript()->appendFile($this->baseUrl().'/js/utilerias.js');
 			echo $this->headScript()."\n";  
 		?>
 		<script>
@@ -72,20 +67,9 @@
 					      return expresion.test(value);
 					},
 					message :'No es un C.P. v\u00e1lido'
-				}			
-						   
-			});
-            
-			var pager = $('#dg').datagrid('getPager');
-            pager.pagination({
-                displayMsg: 'Mostrando {from} a {to} de {total} elementos',
-                beforePageText: 'Paginas',
-                afterPageText: ' de {pages}'
-            });   
-               
-               
-					
-		});				
+				}
+			});	
+		});		
 	</script>
 	
 	</head>

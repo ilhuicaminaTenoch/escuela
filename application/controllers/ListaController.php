@@ -59,6 +59,9 @@ class ListaController extends Application_Model_Filter
 		$modelo = new Application_Model_DbTable_Lista();
 		$titulo_tabla = $modelo->filas_conceptos($session->idGrupo,$session->idMateria);
 		$this->view->titulos = $titulo_tabla;
+		
+		$numeroDeTitulos = $modelo->numero_de_titulos($session->idGrupo,$session->idMateria);
+		$this->view->numeroTitulos = $numeroDeTitulos;
 	}
 	
 	public function gridpromedioAction(){
