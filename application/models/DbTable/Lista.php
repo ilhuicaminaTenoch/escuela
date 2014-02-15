@@ -141,70 +141,117 @@ class Application_Model_DbTable_Lista extends Zend_Db_Table_Abstract {
 		
 	}
 	
-	public function data_grid_promedio($id_materia,$id_grupo){
+	public function data_grid_promedio($id_materia,$id_grupo,$id_profesor){
 		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
-		$SP ="SELECT
-				tb_forma_calificar.S_CONCEPTO as concepto,
-				tb_forma_calificar.N_PORCENTAJE as porcentaje,
-				tb_datos_generales.S_NOMBRE as nombre_alumno,
-				tb_datos_generales.S_MATRICULA as matricula
-				FROM
-				tb_datos_generales ,
-				tb_grupo ,
-				tb_materias ,
-				tb_forma_calificar
-				WHERE
-				tb_datos_generales.S_MATRICULA = tb_forma_calificar.S_MATRICULA AND
-				tb_forma_calificar.N_ID_GRUPO = tb_grupo.N_ID_GRUPO AND
-				tb_forma_calificar.N_ID_MATERIA = tb_materias.id AND
-				tb_grupo.N_ID_GRUPO = $id_grupo AND
-				tb_materias.id = $id_materia
-				GROUP BY matricula 
-				ORDER BY nombre_alumno";//"CALL valida_promedio($id_grupo,$id_materia);";		
-		$ejecuta = $db->fetchAll($SP);		
-		return $ejecuta;
+		$SP ="CALL valida_promedio($id_grupo,$id_materia,$id_profesor);";		
+		$datosAlumnos = $db->fetchAll($SP);		
+		return $datosAlumnos;
 	}
 	
-	public function guarda_datos($json, $id_grupo, $id_materia){
+	public function guarda_datos($json, $id_grupo, $id_materia,$id_profesor){
 		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
-		$cuenta_notas = "SELECT COUNT(*) total_notas
-				  FROM tb_forma_calificar 
-				  WHERE N_ID_MATERIA = $id_materia AND N_ID_GRUPO = $id_grupo";
-		$ejecuta = $db->fetchAll($cuenta_notas);
-		$numeroDeNotas = $ejecuta[0][total_notas];
-		$elimina = "DELETE FROM tb_notas,tb_forma_calificar WHERE tb_notas.S_MATRICULA = tb_forma_calificar.S_MATRICULA and tb_forma_calificar.N_ID_GRUPO = '$id_grupo' and tb_forma_calificar.N_ID_MATERIA = '$id_materia'";
-		for($i = 1; $i<$numeroDeNotas; $i++){
-			
-		}
-		/*
-		$ejecuta_elimina = $db->query($elimina);
+		$borraDatos = "delete from tb_notas where id_materia='$id_materia' and id_grupo = '$id_grupo' and id_profesor='$id_profesor'";
+		$ejecuta_elimina = $db->query($borraDatos);
 		$inserta="";
-		$inserta.= "INSERT INTO tb_promedio(S_MATRICULA,bloque1,bloque2,bloque3,bloque4,bloque5,promedio,N_ID_GRUPO,id_materia) VALUES";		
-		foreach($json as $llave_principal => $valor_principal){
-			foreach($valor_principal as $llave => $valor){
-				$inserta.="('{$valor['matricula']}','{$valor['nota1']}','{$valor['nota2']}','{$valor['nota3']}','{$valor['nota4']}','{$valor['nota5']}','{$valor['nota']}','$id_grupo','$id_materia'),";
-			}
-		}
-		$cadena = trim($inserta, ',');*/
-		echo $cadena;
-		//$ejecuta_inserta = $db->query($cadena);
+		$inserta.= "INSERT INTO tb_notas(id_materia,id_grupo,id_profesor,id_datos_personales,id_mes,notas) VALUES";
+		$contadorNotas = 1;		
+		$numeroTitulo = $this->numero_de_titulos($id_grupo, $id_materia,$id_profesor)+1;
+		foreach($json as $valor_principal){
+			for ($i=2; $i <= $numeroTitulo; $i++) { 
+				$nota = 'nota'.$i;
+				$inserta.="('$id_materia','$id_grupo','$id_profesor','{$valor_principal['id_alumno']}','{$valor_principal['id_mes']}','{$valor_principal[$nota]}'),";	
+			}					
+		}		
+		$cadena = trim($inserta, ',');		
+		$ejecuta_inserta = $db->query($cadena);
 	}
 	
-	public function filas_conceptos($id_grupo,$id_materia){
+	public function filas_conceptos($id_grupo,$id_materia,$id_profesor){
 		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
 		$query = "SELECT S_CONCEPTO as concepto, N_PORCENTAJE as porcentaje
 				  FROM tb_forma_calificar 
-				  WHERE N_ID_MATERIA = $id_materia AND N_ID_GRUPO = $id_grupo";
+				  WHERE N_ID_MATERIA = $id_materia AND N_ID_GRUPO = $id_grupo AND N_ID_PROFESOR = $id_profesor";
 		$ejecuta = $db->fetchAll($query);
 		return $ejecuta;
 	}
 	
-	public function numero_de_titulos($id_grupo,$id_materia){
+	public function numero_de_titulos($id_grupo,$id_materia,$id_profesor){
 		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
 		$query = "SELECT COUNT(*) AS total
 				  FROM tb_forma_calificar 
-				  WHERE N_ID_MATERIA = $id_materia AND N_ID_GRUPO = $id_grupo";
+				  WHERE N_ID_MATERIA = $id_materia AND N_ID_GRUPO = $id_grupo AND N_ID_PROFESOR = $id_profesor";
 		$ejecuta = $db->fetchAll($query);
+		return $ejecuta[0]['total'];
+	}
+	
+	public function mes(){
+		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
+		$query = "SELECT id_mes, mes as mes_nota FROM tb_meses";
+		$ejecuta = $db->fetchAll($query);
+		return $ejecuta;
+	}
+	
+	public function data_grid_notas($id_materia, $id_grupo, $id_profesor){
+		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
+		$queryAlumnos = "SELECT
+			tb_datos_generales.N_DATOS_PERSONALES as id_alumno, 
+			int_cap(tb_datos_generales.S_NOMBRE) AS nombre_alumno,
+			tb_datos_generales.S_MATRICULA AS matricula,
+			tb_meses.id_mes,
+			tb_meses.mes AS mes_nota	
+			FROM
+			tb_notas ,
+			tb_materias ,
+			tb_grupo ,
+			tb_datos_generales,
+			tb_meses
+			WHERE
+			tb_notas.id_materia = tb_materias.id AND
+			tb_notas.id_grupo = tb_grupo.N_ID_GRUPO AND
+			tb_notas.id_datos_personales = tb_datos_generales.N_DATOS_PERSONALES AND
+			tb_notas.id_grupo = id_grupo AND
+			tb_notas.id_mes = tb_meses.id_mes AND
+			tb_notas.id_materia = $id_materia AND
+			tb_notas.id_grupo = $id_grupo AND
+			tb_notas.id_profesor = $id_profesor
+			GROUP BY S_NOMBRE
+			ORDER BY S_NOMBRE";		
+					
+		$ejecuta = $db->fetchAll($queryAlumnos);
+		return $ejecuta;
+	}
+	
+	public function agrupa($id_alumno, $id_materia, $id_grupo, $id_profesor){
+		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
+		$sql = "SELECT
+				tb_notas.notas,
+				tb_notas.id_mes,
+				tb_meses.mes AS mes_nota
+				FROM
+				tb_datos_generales ,
+				tb_notas ,
+				tb_materias ,
+				tb_grupo ,
+				tb_profesor,
+				tb_meses
+				WHERE
+				tb_notas.id_materia = tb_materias.id AND
+				tb_notas.id_grupo = tb_grupo.N_ID_GRUPO AND
+				tb_notas.id_datos_personales = tb_datos_generales.N_DATOS_PERSONALES AND
+				tb_notas.id_mes = tb_meses.id_mes AND
+				tb_notas.id_grupo = id_grupo AND
+				tb_notas.id_materia = $id_materia AND
+				tb_notas.id_grupo = $id_grupo AND
+				tb_notas.id_profesor = $id_profesor AND				
+				tb_datos_generales.N_DATOS_PERSONALES = $id_alumno";
+		$ejecuta = $db->fetchAll($sql);
+		return $ejecuta;
+	}
+	
+	function totalnotas($id_materia, $id_grupo, $id_profesor){
+		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
+		$sql="SELECT COUNT(*) as total FROM tb_notas WHERE id_grupo = $id_grupo AND id_materia = $id_materia AND id_profesor = $id_profesor";
+		$ejecuta = $db->fetchAll($sql);
 		return $ejecuta[0]['total'];
 	}
 }

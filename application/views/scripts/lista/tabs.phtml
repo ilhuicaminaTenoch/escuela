@@ -21,33 +21,41 @@ $rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
 	<div title="Bimestres" style="padding:10px">
 		<table id="dgCalificaciones" class="easyui-datagrid" title="Segumiento de calificaciones" style="width:700px;height:250px"
 				data-options="
-						rownumbers:true,
+						rownumbers:false,
 						singleSelect:true,						
 						url:'<?php echo $this->url(array('controller'=>'Lista','action'=>'gridpromedio'))?>',
 						method:'get',
-						rowStyler: function(index,row){
-							if (row.promedio < 6){
-								return 'background-color:#FA5858;color:#fff;font-weight:bold;';
-							}
-						},
-						onClickRow:function(rowIndex){
-							if (lastIndex != rowIndex){
-								$('#dgCalificaciones').datagrid('endEdit', lastIndex);
-								$('#dgCalificaciones').datagrid('beginEdit', rowIndex);
-								setEditing(rowIndex);
-							}
-							lastIndex = rowIndex;
-						}				
+						rowStyler: rowStyler,
+						onClickRow: onClickRow									
 						">
 			<thead data-options="frozen:true">
+				<th data-options="field:'id_alumno',width:20,align:'center'">ID</th>
 				<th data-options="field:'nombre_alumno',width:180">Nombre</th>
-				<th data-options="field:'matricula',width:100">Matricula</th>
+				<th data-options="field:'matricula',width:100,align:'center'">Matricula</th>				
 			</thead>
 			<thead>
 				<tr>
-					<?php foreach($this->titulos as $concepto){?>
-					<th data-options="field:'<?php echo $concepto['concepto'].'-'.$concepto['porcentaje']; ?>',align:'center',width:150" editor="{type:'numberbox',options:{precision:1}}"><?php echo ucfirst($concepto['concepto']).' '.$concepto['porcentaje'].'%'; ?></th>					
-					<?php } ?>
+					 <th data-options="field:'id_mes',width:150,align:'center',
+						formatter:formatter,
+                        editor:{
+                            type:'combobox',
+                            options:{
+                                valueField:'id_mes',
+                                textField:'mes_nota',
+                                url:'<?php echo $this->url(array('controller'=>'Lista','action'=>'combomes'))?>',
+                                required:true
+                            }
+                        }">Mes</th>
+					<?php 
+					$contador = 2;
+					foreach($this->titulos as $concepto){?>					
+					<th data-options="field:'nota<?php echo $contador; ?>',
+						align:'center',
+						width:150" 
+						editor="{type:'numberbox',options:{precision:1}}"><?php echo ucfirst($concepto['concepto']).'-'.$concepto['porcentaje']; ?></th>
+					<?php 
+					$contador++;
+					} ?>
 				</tr>
 			</thead>
 		</table>		
@@ -73,11 +81,51 @@ $rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
                 });
             }
         });
-        var lastIndex;		
+		var lastIndex;
+		var editIndex = undefined;
+		function rowStyler(index,row){
+			if (row.promedio < 6){
+				return 'background-color:#FA5858;color:#fff;font-weight:bold;';
+			}
+		}
+		
+		function onClickRow(index){			
+			if (editIndex != index){
+				if (endEditing()){
+					$('#dgCalificaciones').datagrid('selectRow', index)
+							.datagrid('beginEdit', index);
+					editIndex = index;
+				} else {
+					$('#dgCalificaciones').datagrid('selectRow', editIndex);
+				}
+			}
+			if (lastIndex != index){
+				$('#dgCalificaciones').datagrid('endEdit', lastIndex);
+				$('#dgCalificaciones').datagrid('beginEdit', index);
+				setEditing(index);
+			}
+			lastIndex = index;		
+			
+        }
+        function endEditing(){
+            if (editIndex == undefined){return true}            
+			if ($('#dgCalificaciones').datagrid('validateRow', editIndex)){
+				var ed = $('#dgCalificaciones').datagrid('getEditor', {index:editIndex,field:'id_mes'});				
+				var mesname = $(ed.target).combobox('getText');
+				var idmes = $(ed.target).combobox('getValue');				
+				$('#dgCalificaciones').datagrid('getRows')[editIndex]['mes_nota'] = mesname;				
+				$('.datagrid-btable #datagrid-row-r2-2-'+editIndex+' td[field="id_mes"] .datagrid-cell .data_idMes').text(idmes);
+				$('#dgCalificaciones').datagrid('endEdit', editIndex);			
+				editIndex = undefined;
+				return true;
+			} else {
+				return false;
+			}
+        }	
 		function setEditing(rowIndex){
-			var editor = $('#dgCalificaciones').datagrid('getEditors', rowIndex);
+			var editor = $('#dgCalificaciones').datagrid('getEditors', rowIndex);			
 			var contador = 1;			
-			var total_editor = editor.length;
+			var total_editor = editor.length;			
 			for(i = 0; i<total_editor; i++){				
 				if(contador < total_editor){					
 					window['nota'+contador+'Editor']= editor[i];				
@@ -96,12 +144,13 @@ $rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
 				for(i = 0; i<total_editor; i++){					
 					if(contador < total_editor){
 						window['nota'+contador+'Editor']= editor[i]; 
-						if(window['nota'+contador+'Editor'].target.val() != ''){
-							selector = $("#datagrid-row-r2-2-0 td[field]:eq("+i+")");
-							campo = selector.attr("field");
+						if(window['nota'+contador+'Editor'].target.val() != ''){														
+							selector = $("#datagrid-row-r2-2-0 td[field]:eq("+i+")");							
+							campo = selector.attr("field");							
 							separa = campo.split("-");
 							porcentaje = parseFloat(separa[1]);
-							suma = suma + (parseFloat(window['nota'+contador+'Editor'].target.val())) * (porcentaje);							
+							suma = suma + (parseFloat(window['nota'+contador+'Editor'].target.val())) * (porcentaje);
+							//console.log(suma);
 						}	
 					}
 					if(contador == total_editor){
@@ -112,6 +161,11 @@ $rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
 				$(calificacionEditor.target).numberbox('setValue',suma);
 			}
 		}
+		function formatter(value,row){
+			return row.mes_nota+'<span style=\'display:none\' class=\'data_idMes\'>'+row.id_mes+'</span>';
+		}
+		
+		
 	</script>
 	</div>
 </div>
@@ -127,18 +181,23 @@ $(document).ready(function() {
 		sortName:"nombre",
 		sortOrder:"asc",
 		remoteSort:false
-		 
+
 	});
 	$('#btn_guarda').bind('click', function(){
-		$('#dgCalificaciones').datagrid('endEdit', lastIndex);
+		if (endEditing()){
+			$('#dg').datagrid('acceptChanges');
+		}
 		var total_items = $(".datagrid-view1 > .datagrid-body > .datagrid-body-inner > .datagrid-btable > tbody > tr > td[field='nombre_alumno']").length;		
 		var totalNotas = $("#datagrid-row-r2-2-0 > td").length;		
 		var json ='';
-		json+='{ "rows": [';
+		json+='[';
 		for(i=0; i<total_items; i++){
 			json+='{';
 			$("tr#datagrid-row-r2-1-"+i+" > td[field]").each(function (indexnom, valuenom) {
 				if(indexnom == 0){
+					var ID = $(this).text();
+					json+='"id_alumno":"'+ID+'",';
+				}else if(indexnom == 1){
 					var nombre = $(this).text();
 					json+='"nombre":"'+nombre+'",';
 				}else{
@@ -148,29 +207,33 @@ $(document).ready(function() {
 			});
 			$("tr#datagrid-row-r2-2-"+i+" td").each(function (index,value) {								
 				index++;
-				var valor = parseFloat($(this).text());
-				if(isNaN(valor)){					
+				var valor = parseFloat($(this).text());				
+				var mes = $(this).find('span').text();
+				if(mes != ''){
+					json+='"id_mes":'+mes+',';
+				}else if(isNaN(valor)){					
 					if(index < totalNotas){
 						json+='"nota'+index+'":0,';			
 					}else{
 						json+='"nota'+index+'":0';
 					}
-				}else{
+				}else{					
 					if(index < totalNotas){
 						json+='"nota'+index+'":'+valor+',';			
 					}else{
 						json+='"nota'+index+'":'+valor;
 					}
 				}
+				
 			});
-			
+
 			if(i < total_items-1){
 				json+='},';
 			}else{
 				json+='}';
 			}
 		}
-		json+=']}';	
+		json+=']';	
 		//console.log(json);
 		$.ajax({
 			url: '<?php echo $this->url(array('controller' => 'Lista', 'action' => 'guarda'));?>',  
@@ -178,7 +241,7 @@ $(document).ready(function() {
 			data: 'cadena='+json,
 			beforeSend: function(objeto){
 				showLoadingScreen('Enviando Datos');
-				
+
 			},
 			complete: function(objeto, exito){				
 				$.unblockUI();
@@ -193,7 +256,9 @@ $(document).ready(function() {
 		});
     });
 	
+	
 });
+
 function showLoadingScreen(mensaje){   
     $.blockUI({
         title: 'ATENCION....',

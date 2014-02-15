@@ -51,16 +51,18 @@ class ListaController extends Application_Model_Filter
 	public function tabsAction(){
 		$id_grupo =addslashes($this->entityFilter->filter($this->sql_command($_GET['id_grupo'])));
 		$id_materia =addslashes($this->entityFilter->filter($this->sql_command($_GET['id_materia'])));
+		$id_profesor =addslashes($this->entityFilter->filter($this->sql_command($_GET['id_profesor'])));
 		$session= new Zend_Session_Namespace('profesores');		
 		$session->idGrupo = $id_grupo;
-		$session->idMateria = $id_materia;		
+		$session->idMateria = $id_materia;
+		$session->idProfesor = $id_profesor;
 		
 		
 		$modelo = new Application_Model_DbTable_Lista();
-		$titulo_tabla = $modelo->filas_conceptos($session->idGrupo,$session->idMateria);
+		$titulo_tabla = $modelo->filas_conceptos($session->idGrupo,$session->idMateria,$session->idProfesor);
 		$this->view->titulos = $titulo_tabla;
 		
-		$numeroDeTitulos = $modelo->numero_de_titulos($session->idGrupo,$session->idMateria);
+		$numeroDeTitulos = $modelo->numero_de_titulos($session->idGrupo,$session->idMateria,$session->idProfesor);
 		$this->view->numeroTitulos = $numeroDeTitulos;
 	}
 	
@@ -69,8 +71,17 @@ class ListaController extends Application_Model_Filter
 		$this->getHelper("viewRenderer")->setNoRender();
 		$session= new Zend_Session_Namespace('profesores');		
 		$modelo = new Application_Model_DbTable_Lista();		
-		$grid_promedio = Zend_Json::encode($modelo->data_grid_promedio($session->idMateria,$session->idGrupo));
-		echo $grid_promedio = html_entity_decode($grid_promedio);
+		$numeroTitulos = $modelo->numero_de_titulos($session->idGrupo,$session->idMateria,$session->idProfesor);		
+		$totalNotas = $modelo->totalnotas($session->idMateria,$session->idGrupo, $session->idProfesor);
+		if($totalNotas > 0){
+			$idAlumos = $modelo->data_grid_notas($session->idMateria,$session->idGrupo, $session->idProfesor);
+			echo html_entity_decode($this->armaJson($idAlumos, $numeroTitulos ,$session->idMateria,$session->idGrupo, $session->idProfesor));
+			
+		}else{
+			$grid_promedio = Zend_Json::encode($modelo->data_grid_promedio($session->idMateria,$session->idGrupo, $session->idProfesor));
+			echo $grid_promedio = html_entity_decode($grid_promedio);
+			
+		}
 	}
 	
 	public function guardaAction(){
@@ -82,8 +93,57 @@ class ListaController extends Application_Model_Filter
 			$json=$this->sql_command($_POST['cadena']);
 			$arreglo = Zend_Json::decode($json);
 			$modelo = new Application_Model_DbTable_Lista();
-			$guarda = $modelo->guarda_datos($arreglo, $session->idGrupo, $session->idMateria);
+			$guarda = $modelo->guarda_datos($arreglo, $session->idGrupo, $session->idMateria,$session->idProfesor);
 		}
 	}
 	
+	public function combomesAction(){
+		$this->_helper->layout->disableLayout();
+		$this->getHelper("viewRenderer")->setNoRender();
+		$modelo = new Application_Model_DbTable_Lista();
+		$combo = Zend_Json::encode($modelo->mes());
+		echo $combo = html_entity_decode($combo);
+	}
+	
+	public function armaJson($idAlumos,$numeroTitulos, $id_materia, $id_grupo, $id_profesor){		
+		$modelo= new Application_Model_DbTable_Lista();
+		$json = '[';
+		$contadorNotas = 2;
+		$contadorAlumnos =1;
+		$totalAlumnos = count($idAlumos);
+		foreach($idAlumos as $valorAlumnos){
+			$notas = $modelo->agrupa($valorAlumnos['id_alumno'],$id_materia, $id_grupo, $id_profesor);	
+			$toralNotas = count($notas);
+			$json .= '{';
+			$json.= '"id_alumno":'.$valorAlumnos['id_alumno'].',';
+			$json.=	'"nombre_alumno":'.'"'.$valorAlumnos['nombre_alumno'].'",';								
+			if( $toralNotas > 1){
+				$json.=	'"matricula":'.'"'.$valorAlumnos['matricula'].'",';
+				foreach($notas as $nota){				
+					if($contadorNotas < $numeroTitulos+1){
+						$json.='"nota'.$contadorNotas.'":'.$nota['notas'].',';
+					}else{
+						$json.='"id_mes":'.$nota['id_mes'].',';
+						$json.='"mes_nota":"'.$nota['mes_nota'].'",';
+						$json.='"nota'.$contadorNotas.'":'.$nota['notas'];					
+					}				
+					$contadorNotas++;			
+				}
+				$contadorNotas = 2;	
+			}else{
+				$json.='"id_mes" : 1,';
+				$json.='"mes_nota":"Enero",';
+				$json.=	'"matricula":'.'"'.$valorAlumnos['matricula'].'"';	
+			}
+			if($contadorAlumnos < $totalAlumnos ){
+				$json.='},';
+			}else{
+				$json.='}';
+			}
+			$contadorAlumnos++;		
+		}		
+		$json.=']';
+		return $json;
+		
+	}
 }

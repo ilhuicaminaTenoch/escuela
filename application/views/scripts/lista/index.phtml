@@ -1,5 +1,6 @@
 <?php 
 $url = Zend_Registry::get('config')->app->baseUrl;
+$id_profesor = Zend_Auth::getInstance()->getIdentity()->N_DATOS_PERSONALES;
 ?>
 <div class="easyui-layout" style="width:959px;height:600px;">
 	<div data-options="region:'west',split:true" title="Lista de Grupos" style="width:180px;">
@@ -21,9 +22,9 @@ $url = Zend_Registry::get('config')->app->baseUrl;
 								$contador_materias=1;					
 							}
 							if($contador_materias == count($valor_padres)){
-								echo"<li class='cierre'><a href='#' onclick='carga_alumnos({$separa[0]},{$hijos_valor['id_materia']})'>{$hijos_valor['materia']}</a></li>";	
+								echo"<li class='cierre'><a href='#' onclick='carga_alumnos({$separa[0]},{$hijos_valor['id_materia']},$id_profesor)'>{$hijos_valor['materia']}</a></li>";	
 							}else{
-								echo"<li><a href='#' onclick='carga_alumnos({$separa[0]},{$hijos_valor['id_materia']})'>{$hijos_valor['materia']}</a></li>";
+								echo"<li><a href='#' onclick='carga_alumnos({$separa[0]},{$hijos_valor['id_materia']},$id_profesor)'>{$hijos_valor['materia']}</a></li>";
 							}
 							$contador_materias++;
 						}
@@ -45,8 +46,8 @@ $url = Zend_Registry::get('config')->app->baseUrl;
 		$(this).next().slideToggle('fast');
 		return false;
 	});
-	function carga_alumnos(id_grupo,id_materia){		
-		$('#contenedorTabs').html('<iframe width="775" height="560" scrolling="No" frameborder="0" name="control" id="control" allowtransparency="true" src="<?php echo $this->url(array('controler'=>'Lista','action'=>'tabs'));?>?id_grupo='+id_grupo+'&id_materia='+id_materia+'"></iframe>');
+	function carga_alumnos(id_grupo,id_materia,id_profesor){		
+		$('#contenedorTabs').html('<iframe width="775" height="560" scrolling="No" frameborder="0" name="control" id="control" allowtransparency="true" src="<?php echo $this->url(array('controler'=>'Lista','action'=>'tabs'));?>?id_grupo='+id_grupo+'&id_materia='+id_materia+'&id_profesor='+id_profesor+'"></iframe>');
 	}	
 	
 
