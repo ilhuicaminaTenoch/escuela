@@ -49,7 +49,7 @@ $rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
 					<?php 
 					$contador = 2;
 					foreach($this->titulos as $concepto){?>					
-					<th data-options="field:'nota<?php echo $contador; ?>',
+					<th data-options="field:'nota<?php echo $contador; ?>-<?php echo $concepto['id_formaCalificar']?>-<?php echo $concepto['porcentaje']; ?>',						
 						align:'center',
 						width:150" 
 						editor="{type:'numberbox',options:{precision:1}}"><?php echo ucfirst($concepto['concepto']).'-'.$concepto['porcentaje']; ?></th>
@@ -148,7 +148,7 @@ $rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
 							selector = $("#datagrid-row-r2-2-0 td[field]:eq("+i+")");							
 							campo = selector.attr("field");							
 							separa = campo.split("-");
-							porcentaje = parseFloat(separa[1]);
+							porcentaje = parseFloat(separa[2]);
 							suma = suma + (parseFloat(window['nota'+contador+'Editor'].target.val())) * (porcentaje);
 							//console.log(suma);
 						}	
@@ -193,7 +193,7 @@ $(document).ready(function() {
 		json+='[';
 		for(i=0; i<total_items; i++){
 			json+='{';
-			$("tr#datagrid-row-r2-1-"+i+" > td[field]").each(function (indexnom, valuenom) {
+			$("tr#datagrid-row-r2-1-"+i+" > td[field]").each(function (indexnom, valuenom) {				
 				if(indexnom == 0){
 					var ID = $(this).text();
 					json+='"id_alumno":"'+ID+'",';
@@ -206,7 +206,13 @@ $(document).ready(function() {
 				}			
 			});
 			$("tr#datagrid-row-r2-2-"+i+" td").each(function (index,value) {								
+				var variables = $(this).attr('field');				
+				separa = variables.split("-");
+				var idFormaCalificar = parseFloat(separa[1]);				
 				index++;
+				if (!isNaN(idFormaCalificar)){
+					json+='"id_forma_calificar'+index+'":'+idFormaCalificar+',';					
+				}
 				var valor = parseFloat($(this).text());				
 				var mes = $(this).find('span').text();
 				if(mes != ''){
@@ -265,4 +271,6 @@ function showLoadingScreen(mensaje){
         message:  mensaje  
     }); 
 }
+
+//$('.datagrid-htable > tbody > tr.datagrid-header-row > td[field="nota1"]')
 </script>

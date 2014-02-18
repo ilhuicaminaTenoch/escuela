@@ -78,8 +78,12 @@ class ListaController extends Application_Model_Filter
 			echo html_entity_decode($this->armaJson($idAlumos, $numeroTitulos ,$session->idMateria,$session->idGrupo, $session->idProfesor));
 			
 		}else{
-			$grid_promedio = Zend_Json::encode($modelo->data_grid_promedio($session->idMateria,$session->idGrupo, $session->idProfesor));
-			echo $grid_promedio = html_entity_decode($grid_promedio);
+			$idAlumos = $modelo->alumnosPorGrupo($session->idGrupo);			
+			foreach($idAlumos as $idAlmno){				
+				$modelo->insertaDefault($session->idMateria,$session->idGrupo, $session->idProfesor,$idAlmno['N_DATOS_PERSONALES']);
+			}
+			$idAlumos2 = $modelo->data_grid_notas($session->idMateria,$session->idGrupo, $session->idProfesor);
+			echo html_entity_decode($this->armaJson($idAlumos2, $numeroTitulos ,$session->idMateria,$session->idGrupo, $session->idProfesor));
 			
 		}
 	}
@@ -106,9 +110,8 @@ class ListaController extends Application_Model_Filter
 	}
 	
 	public function armaJson($idAlumos,$numeroTitulos, $id_materia, $id_grupo, $id_profesor){		
-		$modelo= new Application_Model_DbTable_Lista();
-		$json = '[';
-		$contadorNotas = 2;
+		$modelo = new Application_Model_DbTable_Lista();      
+		$json = '[';		
 		$contadorAlumnos =1;
 		$totalAlumnos = count($idAlumos);
 		foreach($idAlumos as $valorAlumnos){
@@ -117,19 +120,20 @@ class ListaController extends Application_Model_Filter
 			$json .= '{';
 			$json.= '"id_alumno":'.$valorAlumnos['id_alumno'].',';
 			$json.=	'"nombre_alumno":'.'"'.$valorAlumnos['nombre_alumno'].'",';								
-			if( $toralNotas > 1){
-				$json.=	'"matricula":'.'"'.$valorAlumnos['matricula'].'",';
-				foreach($notas as $nota){				
-					if($contadorNotas < $numeroTitulos+1){
-						$json.='"nota'.$contadorNotas.'":'.$nota['notas'].',';
-					}else{
-						$json.='"id_mes":'.$nota['id_mes'].',';
-						$json.='"mes_nota":"'.$nota['mes_nota'].'",';
-						$json.='"nota'.$contadorNotas.'":'.$nota['notas'];					
-					}				
-					$contadorNotas++;			
-				}
-				$contadorNotas = 2;	
+			if( $toralNotas > 1){               
+				$json.=	'"matricula":'.'"'.$valorAlumnos['matricula'].'",';            
+                $contadorNotas = 2;
+                foreach($notas as $valorNota){
+                    if($contadorNotas < $toralNotas+1){
+                        $json.='"id_mes":'.$valorNota['id_mes'].',';
+                        $json.='"mes_nota":"'.$valorNota['mes_nota'].'",';
+                        $json.='"nota'.$contadorNotas.'-'.$valorNota['id_forma_calificar'].'-'.$valorNota['porcentaje'].'":'.floatval($valorNota['notas']).',';    
+                    }else{
+                        $json.='"nota'.$contadorNotas.'-'.$valorNota['id_forma_calificar'].'-'.$valorNota['porcentaje'].'":'.floatval($valorNota['notas']);
+                    }
+                    
+                    $contadorNotas++;
+                }
 			}else{
 				$json.='"id_mes" : 1,';
 				$json.='"mes_nota":"Enero",';
