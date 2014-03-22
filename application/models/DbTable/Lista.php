@@ -1,11 +1,28 @@
 <?php
 class Application_Model_DbTable_Lista extends Zend_Db_Table_Abstract {
-	public function carga_materias_grupo($id_datos_personales){
+	public function carga_materias_grupo($id_datos_personales,$id_grupo){
 		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
-		$sql="SELECT tb_apg.id_materia, tb_materias.materia 
-			  FROM tb_apg ,tb_grupo ,tb_profesor ,tb_datos_generales ,tb_materias
-			  WHERE tb_apg.id_grupo = tb_grupo.N_ID_GRUPO AND tb_profesor.N_DATOS_PERSONALES = tb_datos_generales.N_DATOS_PERSONALES AND 
-			  tb_apg.id_materia = tb_materias.id AND tb_apg.id_grupo = tb_grupo.N_ID_GRUPO AND tb_profesor.N_DATOS_PERSONALES = $id_datos_personales AND tb_apg.id_materia != 0";
+		$sql="SELECT
+tb_grupo.S_GRUPO,
+tb_apg.id_grupo,
+tb_apg.id_materia,
+tb_apg.id_profesor,
+tb_materias.materia,
+tb_datos_generales.S_NOMBRE
+FROM
+tb_apg ,
+tb_grupo ,
+tb_materias ,
+tb_profesor ,
+tb_datos_generales
+WHERE
+tb_apg.id_grupo = tb_grupo.N_ID_GRUPO
+AND tb_apg.id_materia = tb_materias.id
+AND tb_apg.id_profesor = tb_profesor.N_DATOS_PERSONALES
+AND tb_profesor.N_DATOS_PERSONALES = tb_datos_generales.N_DATOS_PERSONALES
+AND tb_profesor.N_DATOS_PERSONALES = $id_datos_personales
+AND tb_apg.id_grupo = $id_grupo
+GROUP BY id_profesor";
 		$filas = $db->fetchAll($sql);
 		return $filas;
 	}
@@ -64,17 +81,16 @@ class Application_Model_DbTable_Lista extends Zend_Db_Table_Abstract {
 		$query_datos_grupo="SELECT tb_apg.id_materia, tb_materias.materia, tb_grupo.S_GRUPO
 							FROM tb_apg ,tb_grupo ,tb_profesor ,tb_datos_generales ,tb_materias
 							WHERE tb_apg.id_grupo = tb_grupo.N_ID_GRUPO AND tb_profesor.N_DATOS_PERSONALES = tb_datos_generales.N_DATOS_PERSONALES AND 
-							tb_apg.id_materia = tb_materias.id AND tb_apg.id_grupo = tb_grupo.N_ID_GRUPO AND tb_profesor.N_DATOS_PERSONALES =7 
+							tb_apg.id_materia = tb_materias.id AND tb_apg.id_grupo = tb_grupo.N_ID_GRUPO AND tb_profesor.N_DATOS_PERSONALES =$id_datos_personales
 							AND tb_materias.id = '$id_materia'";
 		$query_datos_profesor="SELECT tb_datos_generales.S_NOMBRE FROM tb_datos_generales , tb_profesor
 							   WHERE tb_datos_generales.N_DATOS_PERSONALES = tb_profesor.N_DATOS_PERSONALES
-								AND tb_datos_generales.N_DATOS_PERSONALES= '$id_datos_personales'";
+								AND tb_datos_generales.N_DATOS_PERSONALES= $id_datos_personales";
 		
 		$filas_escuela = $db->fetchAll($query_datos_escuela);
 		$filas_grupo = $db->fetchAll($query_datos_grupo);
 		$filas_profesor =$db->fetchAll($query_datos_profesor);
-		$array =[
-					"rows"=>array(
+		$array = array(	"rows"=>array(
 								array(
 									"name"=>"Nombrela escuela",
 									"value"=>ucwords($filas_escuela[0]['nombre_escuela']),
@@ -136,7 +152,7 @@ class Application_Model_DbTable_Lista extends Zend_Db_Table_Abstract {
 									"group"=>"Profesor"
 								)
 							)
-				];
+				);
 		return $array;
 		
 	}
@@ -184,7 +200,7 @@ class Application_Model_DbTable_Lista extends Zend_Db_Table_Abstract {
 		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
 		$query = "SELECT S_CONCEPTO as concepto, N_PORCENTAJE as porcentaje, N_ID_FORMA_CALIFICAR AS id_formaCalificar
 				  FROM tb_forma_calificar 
-				  WHERE N_ID_MATERIA = $id_materia AND N_ID_GRUPO = $id_grupo AND N_ID_PROFESOR = $id_profesor";
+				  WHERE N_ID_MATERIA = $id_materia AND N_ID_GRUPO = $id_grupo AND N_ID_PROFESOR = $id_profesor ORDER BY N_PORCENTAJE DESC, N_ID_FORMA_CALIFICAR";
 		$ejecuta = $db->fetchAll($query);
 		return $ejecuta;
 	}
@@ -222,8 +238,7 @@ class Application_Model_DbTable_Lista extends Zend_Db_Table_Abstract {
 			WHERE
 			tb_notas.id_materia = tb_materias.id AND
 			tb_notas.id_grupo = tb_grupo.N_ID_GRUPO AND
-			tb_notas.id_datos_personales = tb_datos_generales.N_DATOS_PERSONALES AND
-			tb_notas.id_grupo = id_grupo AND
+			tb_notas.id_datos_personales = tb_datos_generales.N_DATOS_PERSONALES AND			
 			tb_notas.id_mes = tb_meses.id_mes AND
 			tb_notas.id_materia = $id_materia AND
 			tb_notas.id_grupo = $id_grupo AND
@@ -238,30 +253,29 @@ class Application_Model_DbTable_Lista extends Zend_Db_Table_Abstract {
 	public function agrupa($id_alumno, $id_materia, $id_grupo, $id_profesor){
 		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
 		$sql = "SELECT
-				tb_notas.notas,
-				tb_notas.id_mes,
-				tb_meses.mes AS mes_nota,
-                tb_forma_calificar.N_PORCENTAJE AS porcentaje,
-				tb_forma_calificar.N_ID_FORMA_CALIFICAR AS id_forma_calificar
-				FROM
-				tb_datos_generales ,
-				tb_notas ,
-				tb_materias ,
-				tb_grupo ,
-				tb_profesor,
-				tb_meses,
-                tb_forma_calificar
-				WHERE
-				tb_notas.id_materia = tb_materias.id AND
-				tb_notas.id_grupo = tb_grupo.N_ID_GRUPO AND
-				tb_notas.id_datos_personales = tb_datos_generales.N_DATOS_PERSONALES AND
-				tb_notas.id_mes = tb_meses.id_mes AND
-				tb_notas.id_grupo = id_grupo AND
-                tb_notas.N_ID_FORMA_CALIFICAR = tb_forma_calificar.N_ID_FORMA_CALIFICAR AND
-				tb_notas.id_materia = $id_materia AND
-				tb_notas.id_grupo = $id_grupo AND
-				tb_notas.id_profesor = $id_profesor AND				
-				tb_datos_generales.N_DATOS_PERSONALES = $id_alumno";
+            	tb_notas.notas,
+            	tb_notas.id_mes,
+            	tb_meses.mes AS mes_nota,
+            	tb_forma_calificar.N_PORCENTAJE AS porcentaje,
+            	tb_forma_calificar.N_ID_FORMA_CALIFICAR AS id_forma_calificar
+            FROM
+            	tb_notas ,
+            	tb_materias ,
+            	tb_grupo ,
+            	tb_datos_generales ,
+            	tb_meses,
+            	tb_forma_calificar
+            WHERE
+            	tb_notas.id_grupo = tb_grupo.N_ID_GRUPO AND
+            	tb_notas.id_materia = tb_materias.id AND
+            	tb_notas.id_profesor = tb_datos_generales.N_DATOS_PERSONALES AND
+            	tb_notas.id_mes = tb_meses.id_mes AND
+            	tb_notas.N_ID_FORMA_CALIFICAR = tb_forma_calificar.N_ID_FORMA_CALIFICAR AND
+            	tb_notas.id_grupo = $id_grupo AND
+            	tb_notas.id_materia = $id_materia AND
+            	tb_notas.id_profesor = $id_profesor AND
+            	tb_notas.id_datos_personales = $id_alumno
+           ORDER BY tb_forma_calificar.N_PORCENTAJE DESC, tb_forma_calificar.N_ID_FORMA_CALIFICAR";
 		$ejecuta = $db->fetchAll($sql);
 		return $ejecuta;
 	}
@@ -287,5 +301,62 @@ class Application_Model_DbTable_Lista extends Zend_Db_Table_Abstract {
 				AND tb_grupo.N_ID_GRUPO = $id_grupo";
 		$ejecuta = $db->fetchAll($sql);
 		return $ejecuta;
+	}
+	
+	public function carga_grid_forma_calificar($id_materia, $id_grupo, $id_profesor){
+		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
+		$query = "select * from tb_forma_calificar where N_ID_MATERIA = '$id_materia' and N_ID_GRUPO = '$id_grupo' and N_ID_PROFESOR = '$id_profesor' ORDER BY N_PORCENTAJE DESC";
+		$filas = $db->fetchAll($query);
+		return $filas;
+	}
+	
+	public function guarda_formadecalificar($id_materia, $id_grupo, $id_profesor, $concepto, $porcentaje,$id_mes,$id_ciclo_escolar){
+		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
+		echo $query = "insert into tb_forma_calificar(N_ID_MATERIA,N_ID_GRUPO,N_ID_PROFESOR,S_CONCEPTO,N_PORCENTAJE,N_MES,N_ID_CICLOESCOLAR)
+			  VALUES('$id_materia', '$id_grupo', '$id_profesor', '$concepto', '$porcentaje',$id_mes,$id_ciclo_escolar)";
+		$ejecuta = $db->query($query);
+	}
+	
+	public function updtae_formadecalificar($id,$concepto,$porcentaje){
+		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
+		$query = "update tb_forma_calificar set S_CONCEPTO = '$concepto',N_PORCENTAJE = '$porcentaje' where N_ID_FORMA_CALIFICAR = '$id'";
+		$ejecuta = $db->query($query);
+	}
+	public function delete_fromadecalificar($id){
+		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
+		$query = "delete from tb_forma_calificar where N_ID_FORMA_CALIFICAR = '$id'";
+		$ejecuta = $db->query($query);
+	}
+	
+	public function valida_porcentaje($id_materia,$id_grupo,$id_profesor,$concepto, $porcentaje,$id_mes,$id_ciclo_escolar){
+	    $db = Zend_Db_Table_Abstract::getDefaultAdapter();
+		$total = $this->cien_porciento($id_materia, $id_grupo, $id_profesor);
+		
+		$queryTotalNotal = "SELECT COUNT(*) AS totalNotas FROM tb_forma_calificar WHERE N_ID_MATERIA = $id_materia AND N_ID_GRUPO = $id_grupo AND N_ID_PROFESOR = $id_profesor";
+		$ejecutaTotalNotal = $db->fetchAll($queryTotalNotal);
+		
+		$totalNotas = $ejecutaTotalNotal[0]['totalNotas'];
+		if($totalNotas == 0){
+			$queryInsertaPromedio = "INSERT INTO tb_forma_calificar(N_ID_MATERIA,N_ID_GRUPO,N_ID_PROFESOR,S_CONCEPTO,N_PORCENTAJE,N_MES,N_ID_CICLOESCOLAR)
+			                         VALUES($id_materia,$id_grupo,$id_profesor,'Promedio',0.00,$id_mes,$id_ciclo_escolar)";
+			$ejecutaInsertaPromedio = $db->query($queryInsertaPromedio);
+		}
+		if ($total > 100) {
+		    json_encode(array(
+		    		'isError' => true,
+		    		'msg' => 'Has sobrepasado el 100% para la evaluacacion.'
+		    ));
+			
+		}else{
+			$this->guarda_formadecalificar($id_materia, $id_grupo, $id_profesor, $concepto, $porcentaje, $id_mes, $id_ciclo_escolar);			
+		}
+	}
+	
+	public function cien_porciento($id_materia,$id_grupo,$id_profesor){
+	    $db = Zend_Db_Table_Abstract::getDefaultAdapter();
+	    $query = "select sum(N_PORCENTAJE) as total from tb_forma_calificar where N_ID_MATERIA = $id_materia and N_ID_GRUPO = $id_grupo and N_ID_PROFESOR = $id_profesor";
+	    $ejecuta = $db->fetchAll($query);
+	    $total = $ejecuta[0]['total'];
+	    return intval($total);
 	}
 }

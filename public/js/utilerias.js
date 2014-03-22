@@ -28,3 +28,7 @@ function formatDollar(num) {
         return  num + (i && !(i % 3) ? "," : "") + acc;
     }, "") + "." + p[1];
 }
+
+function link(controlador,id_profesor){
+    document.location.href = controlador,"_blank";
+}

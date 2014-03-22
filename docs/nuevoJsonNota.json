@@ -1,0 +1,32 @@
+[
+    {
+        "id_alumno": "2",
+        "nombre": "Alumno1",
+        "matricula": "a1393283183346",
+        "id_mes": 1,
+        "id_forma_calificar2": 2,
+        "nota2": 10,
+        "corre_pariente": "pariente1@hotmail.com",
+        "movil": "5544489836"
+    },
+    {
+        "id_alumno": "2",
+        "nombre": "Alumno1",
+        "matricula": "a1393283183346",
+        "id_mes": 1,
+        "id_forma_calificar4": 3,
+        "nota3": 6,
+        "corre_pariente": "pariente1@hotmail.com",
+        "movil": "5544489836"
+    },
+    {
+        "id_alumno": "7",
+        "nombre": "Alumno3",
+        "matricula": "",
+        "id_mes": 1,
+        "id_forma_calificar5": 1,
+        "nota5": 8.6,
+        "corre_pariente": "pariente1@hotmail.com",
+        "movil": "5544489836"
+    }
+]

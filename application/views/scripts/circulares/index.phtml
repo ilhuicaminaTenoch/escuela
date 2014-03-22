@@ -1,0 +1,451 @@
+<?php 
+$IdDatosPersonales = Zend_Auth::getInstance()->getIdentity()->N_DATOS_PERSONALES;
+$rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
+$sessionPerfiles = new Zend_Session_Namespace('perfiles');
+$id_perfil = $sessionPerfiles->perfil;
+?>
+<style>
+	.icon-filter{
+		background:url('<?php echo $rutaPublica?>/imagenes/filter.png') no-repeat center center;
+	}
+</style>
+<script src="<?php echo $rutaPublica ?>js/jquery.uploadify.min.js" type="text/javascript"></script>
+<!-- Load TinyMCE -->
+<script type="text/javascript" src="<?php echo $rutaPublica ?>tinymce/jscripts/tiny_mce/jquery.tinymce.js"></script>
+<script type="text/javascript">
+	$().ready(function() {
+		$('textarea.tinymce').tinymce({			
+			script_url : '<?php echo $rutaPublica ?>tinymce/jscripts/tiny_mce/tiny_mce.js',			
+			theme : "simple"
+			
+		});
+	});
+</script>
+<!-- /TinyMCE -->
+<div class="easyui-layout" style="width:950px;height:550px;">
+    <div data-options="region:'north'" style="height:70px">      
+        <div class="grid_2">
+            <div class="fitem">
+                <label>Tipo:</label>
+                <select id="tipo" onchange="activaCombo('materias');">
+                    <option value="">Selecciona</option>
+                    <?php foreach ($this->avisos as $aviso) {
+                    	echo"<option value='{$aviso['id_tipo']}'>{$aviso['tipo']}</option>";
+                    }?>                    
+                </select>
+            </div>
+         </div>
+         <div class="grid_2">
+            <div class="fitem">
+            <?php if ($id_perfil == 2 || $id_perfil == '2') {?>
+                <label for="etiqueta">Materias:</label>
+            <?php }else{?>
+                <label for="etiqueta">Perfil:</label>
+            <?php }?>
+                <select id="materias" disabled="disabled" onchange="<?php if ($id_perfil == 2 || $id_perfil == '2') { echo "activaCombo('grupos');";}else{ echo "cargaGrid('materias');";}?>">
+                    <option value="0" selected>Selecciona</option>                                        
+                    <?php
+                    foreach ($this->materias as $materia) {                        
+                    	echo"<option value = '{$materia['id_materia']}'>{$materia['nombre_materia']}</option>";
+                    }
+                    ?>
+                </select>                          
+            </div>
+           </div>           
+           <div class="grid_2" style="<?php if ($id_perfil == 2 || $id_perfil == '2') { echo"display=block;";}else{ echo"display:none;";}?>">
+            <div class="fitem">
+                <label>Grupo:</label>
+                <select id="grupos" onchange="cargaGrid('grupos');" disabled="disabled">
+                    <option value="" selected>Selecciona</option>
+                    <option value="<?php echo $this->todos;?>">Todos</option>                    
+                    <?php
+                    foreach ($this->grupos as $grupo) {                        
+                    	echo"<option value = '{$grupo['id_grupo']}'>{$grupo['grupo']}</option>";
+                    }
+                    ?>
+                </select>               
+            </div>
+          </div>
+          <div class="grid_2" style="padding-top: 5px;">
+            <a href="#" id="btnNotas" class="easyui-linkbutton" onclick="$('#dlg').dialog('open');" data-options="">Notas enviadas</a>
+          </div>
+          <div id="dlg" class="easyui-dialog" data-options="iconCls:'icon-save'" style="padding:10px">
+                 <div class="easyui-layout" data-options="fit:true">
+                    <div class="easyui-tabs" style="width:auto;height:330px">
+                        <div title="Notas alumnos" style="padding:10px; height:320px">
+                            <table id="dgAvisosAlumnos" class="easyui-datagrid" style="width:auto; height:270px;"
+                                   data-options="rownumbers:true,
+                                          singleSelect:true,                                          
+                                          method:'get',                                 
+                                          pagination:true,
+                                          pageSize:10,
+                                          toolbar:'#toolbar'
+                                          ">
+                                <thead>
+                                    <tr>                                             
+                                        <th data-options="field:'S_NOMBRE',width:200">Nombre</th>                                    
+                                        <th data-options="field:'tipo',width:80">Tipo nota</th>
+                                        <th data-options="field:'fecha_envio',width:150">Fecha de envio</th>            
+                                        <th data-options="field:'S_GRUPO',width:80">Grupo</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                            <div id="toolbar">                    
+                                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editUser('dgAvisosAlumnos','contenido-nota')">Ver Nota</a>                    
+                            </div>
+                        </div>
+                        <div title="Notas profesores" style="padding:10px">
+                            <table id="dgAvisosProfesores" class="easyui-datagrid" style="width:auto; height:270px;"
+                                   data-options="rownumbers:true,
+                                          singleSelect:true,                                          
+                                          method:'get',                                 
+                                          pagination:true,
+                                          pageSize:10,
+                                          toolbar:'#toolbarProfesores'
+                                          ">
+                                <thead>
+                                    <tr>                                             
+                                        <th data-options="field:'S_NOMBRE',width:200">Nombre</th>                                    
+                                        <th data-options="field:'tipo',width:80">Tipo nota</th>
+                                        <th data-options="field:'fecha_envio',width:150">Fecha de envio</th>                                     
+                                    </tr>
+                                </thead>
+                            </table>
+                            <div id="toolbarProfesores">                    
+                                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editUser('dgAvisosProfesores','contenido-nota')">Ver Nota</a>                    
+                            </div>
+                        </div>
+                    </div>
+                    <div id="contenido-nota" data-options="region:'south',split:true,title:'Nota'" style="width:auto; height:200px;"></div>
+                   
+                    
+                </div>               
+           </div>
+    </div>
+    <div data-options="region:'south',title:'Nota',split:true" style="height:270px">
+        <textarea name="S_NOTA" id="S_NOTA" style="width:940px; height:200px;" class="tinymce"></textarea>
+    </div> 
+    <div data-options="region:'center',title:'Circulares del profesor: <?php echo Zend_Auth::getInstance()->getIdentity()->S_NOMBRE;?> ',iconCls:'icon-ok'" style="height:270px">
+        
+        <table id="dgAlumnos" class="easyui-datagrid" style="width:auto; height:150px"
+            data-options="rownumbers:true,
+                          singleSelect:false,
+                          url:'<?php echo $this->url(array('controller'=>'circulares','action'=>'reaload'));?>',
+                          method:'get',
+                          idField:'id_alumno',
+                          pagination:true
+                          ">
+            <thead>
+                <tr>
+                    <th data-options="field:'ck',checkbox:true"></th>                    
+                    <th data-options="field:'nombre',width:500">Nombre</th>
+                    <th data-options="field:'email',width:200">E-mail Alumno</th>                  
+                </tr>
+            </thead>
+        </table>            
+    </div>
+    
+</div>
+<a href="#" class="easyui-linkbutton" iconCls="icon-save" onclick="confirm();">Guardar y Enviar</a>
+<script type="text/javascript">
+var json_notas = '',json_notas_profesor='';
+reloadGridAvisos();
+reloadGridAvisosProfesor();
+$('#dgAvisosAlumnos').datagrid({loadFilter:pagerFilter}).datagrid('loadData',json_notas);
+$('#dgAvisosProfesores').datagrid({loadFilter:pagerFilterProfesores}).datagrid('loadData',json_notas_profesor);
+    function cargaGrid(select){        
+        var valor = $("#"+select).val();                       
+        $('#dgAlumnos').datagrid('reload',{idGrupo:valor});
+        $('#dgAlumnos').datagrid('clearChecked');
+                 
+    }
+    function activaCombo(idCombo){
+        $("#"+idCombo).removeAttr('disabled');       
+    }
+    function confirm(){
+    	tipo = asunto = $("#tipo option:selected").html();
+        $.messager.confirm('Atencion', 'El mensaje se va a enviar como: '+tipo+' \u00bfEsta seguro que es correcto\u0030f', function(r){
+            if (r){
+            	guardar();
+            }
+        });
+    }
+    function guardar(){
+   	  	  
+ 	   var data = ajaxSave();//escape(ed.getContent());
+       var idTipo = $('#tipo').val(), idMaterias = $('#materias').val(), idGrupo = $('#grupos').val(), asunto = $("#tipo option:selected").html();        
+       var json = "";    
+       if(idGrupo == '' || idGrupo.length > 1){
+    	   idGrupo = 0;
+       }
+       
+       json+='{';
+       json+='"tipo":'+idTipo+',';
+       json+='"idMateria":'+idMaterias+',';
+       json+='"idGrupo":"'+idGrupo+'",';
+       json+='"nota":"'+addslashes(data)+'",';
+       json+= getSelections();       
+       json+="}";      
+       $.ajax({
+			url: "<?php echo $this->url(array('controller' => 'circulares', 'action' => 'guarda'));?>",
+			async:true,
+			data:'tipo='+idTipo+'&idMateria='+idMaterias+'&idGrupo='+idGrupo+'&alumnos='+getSelections()+'&nota='+ajaxSave()+'&asunto='+asunto,
+			beforeSend: function(objeto){
+				showLoadingScreen('Enviando Datos');
+			},
+			success: function(datos){				 
+				 $.messager.alert('O.K.','Los Datos se mandaron con exito','info');
+			},
+			complete: function(objeto, exito){				
+				$.unblockUI();
+				//RECARGA GRID AVISOS ALUMNOS
+				reloadGridAvisos();				
+				$('#dgAvisosAlumnos').datagrid({loadFilter:pagerFilter}).datagrid('loadData',json_notas);
+
+				//RECARGA GRID AVISOS PROFESORES
+				reloadGridAvisosProfesor();
+				$('#dgAvisosProfesores').datagrid({loadFilter:pagerFilterProfesores}).datagrid('loadData',json_notas_profesor);
+				
+			},
+			contentType: "application/x-www-form-urlencoded",
+			dataType: "html",
+			error: function(objeto, quepaso, otroobj){
+				alert("Estas viendo esto por que fallé");
+				alert("Pasó lo siguiente: "+quepaso);
+			},			
+			
+			timeout: 3000,
+			type: "POST"
+			
+		});          
+	   
+    }
+
+    function getSelections(){       
+        var ss = [];
+        var rows = $('#dgAlumnos').datagrid('getSelections');
+        for(var i=0; i<rows.length; i++){
+            var row = rows[i];
+            ss.push(row.id_alumno+'-'+row.email);
+                   
+        }         
+        return ss; 
+    }
+    function showLoadingScreen(mensaje){   
+        $.blockUI({
+            title: 'ATENCION....',
+            message:  mensaje  
+        }); 
+    }
+    function addslashes(string) {
+        return string.replace(/\\/g, '\\\\').
+            replace(/\u0008/g, '\\b').
+            replace(/\t/g, '\\t').
+            replace(/\n/g, '\\n').
+            replace(/\f/g, '\\f').
+            replace(/\r/g, '\\r').          
+            replace(/"/g, '\\"');
+    }
+    function ajaxSave() {
+        var ed = tinyMCE.get('S_NOTA');        
+        return escape(ed.getContent());
+    }
+    $('#dlg').dialog({
+        title: 'Notas enviadas',
+        width: 960,
+        height: 600,
+        closed: true,
+        cache: false,        
+        modal: true
+    });
+    function editUser(dgGrid,contenedorNota){    
+   	 var row = $('#'+dgGrid).datagrid('getSelected');   	
+     if (row){
+         $('#'+contenedorNota).html(row.nota);         
+     }
+    }
+
+    $(function(){
+        //FILTER ALUMNOS
+		var dg = $('#dgAvisosAlumnos').datagrid({
+			filterBtnIconCls:'icon-filter'					
+		});
+		dg.datagrid('enableFilter', [{
+			field:'tipo',
+			type:'combobox',
+			options:{
+				panelHeight:'auto',
+				data:<?php echo $this->filter_tipo; ?>,
+				onChange:function(value){
+					if (value == ''){
+						dg.datagrid('removeFilterRule', 'tipo');
+					} else {
+						dg.datagrid('addFilterRule', {
+							field: 'tipo',
+							op: 'equal',
+							value: value
+						});
+					}
+					dg.datagrid('doFilter');
+				}
+			}
+		},{
+			field:'fecha_envio',
+			type:'datebox',			
+			op:['equal']
+		},{
+			field:'S_GRUPO',
+			type:'combobox',
+			options:{
+				panelHeight:'auto',
+				data:<?php echo $this->filter_grupo; ?>,
+				onChange:function(value){
+					if (value == ''){
+						dg.datagrid('removeFilterRule', 'S_GRUPO');
+					} else {
+						dg.datagrid('addFilterRule', {
+							field: 'S_GRUPO',
+							op: 'equal',
+							value: value
+						});
+					}
+					dg.datagrid('doFilter');
+				}
+			}
+		}]);
+
+		//FILTER PROFESORES
+		var dgProfesores = $('#dgAvisosProfesores').datagrid({
+			filterBtnIconCls:'icon-filter'					
+		});
+		dgProfesores.datagrid('enableFilter', [{
+			field:'tipo',
+			type:'combobox',
+			options:{
+				panelHeight:'auto',
+				data:<?php echo $this->filter_tipo; ?>,
+				onChange:function(value){
+					if (value == ''){
+						dgProfesores.datagrid('removeFilterRule', 'tipo');
+					} else {
+						dgProfesores.datagrid('addFilterRule', {
+							field: 'tipo',
+							op: 'equal',
+							value: value
+						});
+					}
+					dgProfesores.datagrid('doFilter');
+				}
+			}
+		},{
+			field:'fecha_envio',
+			type:'datebox',			
+			op:['equal']
+		}]);
+		
+		
+	});
+	function reloadGridAvisos(){		
+		$.ajax({
+			url: "<?php echo $this->url(array('controller' => 'circulares', 'action' => 'cargagridavisos'));?>",
+			async:false,			
+			success: function(data){				
+				json_notas= data;
+				//console.log(data);			
+			},
+					
+			contentType: "application/x-www-form-urlencoded",
+			dataType: "json",
+			error: function(objeto, quepaso, otroobj){
+				alert("Estas viendo esto por que fallé");
+				alert("Pasó lo siguiente: "+quepaso);
+			},			
+			timeout: 3000,
+			type: "POST"			
+		});			
+		return json_notas;
+	}
+
+	function reloadGridAvisosProfesor(){		
+		$.ajax({
+			url: "<?php echo $this->url(array('controller' => 'circulares', 'action' => 'cargagridavisosprofesor'));?>",
+			async:false,			
+			success: function(data){				
+				json_notas_profesor= data;
+				//console.log(data);			
+			},
+					
+			contentType: "application/x-www-form-urlencoded",
+			dataType: "json",
+			error: function(objeto, quepaso, otroobj){
+				alert("Estas viendo esto por que fallé");
+				alert("Pasó lo siguiente: "+quepaso);
+			},			
+			timeout: 3000,
+			type: "POST"			
+		});			
+		return json_notas;
+	}	
+
+	function pagerFilter(json_notas){
+        if (typeof json_notas.length == 'number' && typeof json_notas.splice == 'function'){    // is array
+            data = {
+                total: json_notas.length,
+                rows: data
+            }
+        }
+        var dg = $(this);
+        var opts = dg.datagrid('options');
+        var pager = dg.datagrid('getPager');
+        pager.pagination({
+            onSelectPage:function(pageNum, pageSize){
+                opts.pageNumber = pageNum;
+                opts.pageSize = pageSize;
+                pager.pagination('refresh',{
+                    pageNumber:pageNum,
+                    pageSize:pageSize
+                });
+                dg.datagrid('loadData',json_notas);
+            }
+        });
+        if (!json_notas.originalRows){
+        	json_notas.originalRows = (json_notas.rows);
+        }
+        var start = (opts.pageNumber-1)*parseInt(opts.pageSize);
+        var end = start + parseInt(opts.pageSize);
+        json_notas.rows = (json_notas.originalRows.slice(start, end));
+        return json_notas;
+    }
+
+	function pagerFilterProfesores(json_notas_profesor){
+        if (typeof json_notas_profesor.length == 'number' && typeof json_notas_profesor.splice == 'function'){    // is array
+            data = {
+                total: json_notas_profesor.length,
+                rows: data
+            }
+        }
+        var dg = $(this);
+        var opts = dg.datagrid('options');
+        var pager = dg.datagrid('getPager');
+        pager.pagination({
+            onSelectPage:function(pageNum, pageSize){
+                opts.pageNumber = pageNum;
+                opts.pageSize = pageSize;
+                pager.pagination('refresh',{
+                    pageNumber:pageNum,
+                    pageSize:pageSize
+                });
+                dg.datagrid('loadData',json_notas_profesor);
+            }
+        });
+        if (!json_notas_profesor.originalRows){
+        	json_notas_profesor.originalRows = (json_notas_profesor.rows);
+        }
+        var start = (opts.pageNumber-1)*parseInt(opts.pageSize);
+        var end = start + parseInt(opts.pageSize);
+        json_notas_profesor.rows = (json_notas_profesor.originalRows.slice(start, end));
+        return json_notas_profesor;
+    }
+		
+   
+</script>

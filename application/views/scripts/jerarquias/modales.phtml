@@ -53,6 +53,19 @@
     <input id="q" style="line-height:18px;border:1px solid #ccc">      
     <a href="#" class="easyui-linkbutton" plain="true" onclick="doSearch()">Buscar</a>
 </div>
+<div id="dlgGrupos-buttons">
+	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onclick="guardaGrupos()">Guardar</a>
+	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlgGrupos').dialog('close')">Cancelar</a>
+</div>
+<div id="dlgGrupos" class="easyui-dialog" style="width:400px;height:280px;padding:10px 20px" closed="true" buttons="#dlgGrupos-buttons">
+	<form id="fmGrupos" method="post" novalidate>
+		<div class="fitem">
+			<label>Nombre Grupo:</label>
+            <input name="grupo" class="easyui-validatebox nombre" data-options="missingMessage:'Este campo es obligatorio',required:true" class="100%">
+		</div>		
+	</form>
+</div>
+
 <script>
 	function doSearch() {
         $('#dgAlumnosSinGurpo').datagrid('load', {q: $('#q').val()});		

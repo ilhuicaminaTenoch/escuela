@@ -9,12 +9,13 @@ class ListaController extends Application_Model_Filter
 		$IdDatosPersonales = Zend_Auth::getInstance()->getIdentity()->N_DATOS_PERSONALES;
 		$modeloArbol = new Application_Model_DbTable_Arbol();
 		$modeloLista = new Application_Model_DbTable_Lista();		
-		$padres = $modeloArbol->carga_arbol_grupos($IdDatosPersonales);
+		$padres = $modeloArbol->carga_arbol_grupo($IdDatosPersonales);
+		
 		$contenedor =array();
 		foreach($padres as $padre){			
-			$contenedor[$padre['id_grupo'].'_'.$padre['grupo']] = $modeloLista->carga_materias_grupo($IdDatosPersonales);
+			$contenedor[$padre['id_grupo'].'_'.$padre['grupo']] = $modeloLista->carga_materias_grupo($IdDatosPersonales,$padre['id_grupo']);
 		}
-		$this->view->datos = $contenedor;		
+		$this->view->datos = $contenedor;
 	}	
 	
 	
@@ -64,6 +65,9 @@ class ListaController extends Application_Model_Filter
 		
 		$numeroDeTitulos = $modelo->numero_de_titulos($session->idGrupo,$session->idMateria,$session->idProfesor);
 		$this->view->numeroTitulos = $numeroDeTitulos;
+		
+		$totalNotas = $modelo->cien_porciento($session->idMateria,$session->idGrupo, $session->idProfesor);
+		$this->view->cienPorciento = $totalNotas;
 	}
 	
 	public function gridpromedioAction(){
@@ -119,17 +123,17 @@ class ListaController extends Application_Model_Filter
 			$toralNotas = count($notas);
 			$json .= '{';
 			$json.= '"id_alumno":'.$valorAlumnos['id_alumno'].',';
-			$json.=	'"nombre_alumno":'.'"'.$valorAlumnos['nombre_alumno'].'",';								
-			if( $toralNotas > 1){               
+			$json.=	'"nombre_alumno":'.'"'.$valorAlumnos['nombre_alumno'].'",';			
+            if( $toralNotas > 1){               
 				$json.=	'"matricula":'.'"'.$valorAlumnos['matricula'].'",';            
                 $contadorNotas = 2;
-                foreach($notas as $valorNota){
+                foreach($notas as $valorNota){                    
                     if($contadorNotas < $toralNotas+1){
                         $json.='"id_mes":'.$valorNota['id_mes'].',';
                         $json.='"mes_nota":"'.$valorNota['mes_nota'].'",';
-                        $json.='"nota'.$contadorNotas.'-'.$valorNota['id_forma_calificar'].'-'.$valorNota['porcentaje'].'":'.floatval($valorNota['notas']).',';    
+                        $json.='"nota'.$contadorNotas.'-'.$valorNota['id_forma_calificar'].'-'.$valorNota['porcentaje'] * 0.01 .'":'.floatval($valorNota['notas']).',';    
                     }else{
-                        $json.='"nota'.$contadorNotas.'-'.$valorNota['id_forma_calificar'].'-'.$valorNota['porcentaje'].'":'.floatval($valorNota['notas']);
+                        $json.='"nota'.$contadorNotas.'-'.$valorNota['id_forma_calificar'].'-'.$valorNota['porcentaje'] * 0.01 .'":'.floatval($valorNota['notas']);
                     }
                     
                     $contadorNotas++;
@@ -148,6 +152,43 @@ class ListaController extends Application_Model_Filter
 		}		
 		$json.=']';
 		return $json;
+		
+	}	
+	public function formadecalificarAction(){
+		$this->_helper->layout->disableLayout();
+		$this->getHelper("viewRenderer")->setNoRender();
+		$modelo = new Application_Model_DbTable_Lista();	
+		$session= new Zend_Session_Namespace('profesores');	
+		$grid_forma = Zend_Json::encode($modelo->carga_grid_forma_calificar($session->idMateria,$session->idGrupo, $session->idProfesor));
+		echo $grid_forma = html_entity_decode($grid_forma);		
+	}
+	
+	public function saveformadecalificarAction(){
+		$this->_helper->layout->disableLayout();
+		$this->getHelper("viewRenderer")->setNoRender();
+		$concepto = $this->_request->getParam('S_CONCEPTO');
+		$porcentaje = $this->_request->getParam('N_PORCENTAJE');
+		$modelo = new Application_Model_DbTable_Lista();
+		$session= new Zend_Session_Namespace('profesores');		
+		echo $inserta = $modelo->valida_porcentaje($session->idMateria,$session->idGrupo, $session->idProfesor,$concepto,$porcentaje,1,1);
+	}
+	
+	public function updateformadecalificarAction(){
+		$this->_helper->layout->disableLayout();
+		$this->getHelper("viewRenderer")->setNoRender();
+		$id = $this->_request->getParam('N_ID_FORMA_CALIFICAR');
+		$concepto = $this->_request->getParam('S_CONCEPTO');
+		$porcentaje = $this->_request->getParam('N_PORCENTAJE');
+		$modelo = new Application_Model_DbTable_Lista();
+		$update = $modelo->updtae_formadecalificar($id,$concepto,$porcentaje);
+	}
+	
+    public function deleteformadecalificarAction(){
+		$this->_helper->layout->disableLayout();
+		$this->getHelper("viewRenderer")->setNoRender();
+		$id =$this->_request->getParam('N_ID_FORMA_CALIFICAR');	
+		$modelo = new Application_Model_DbTable_Lista();
+		$elimina = $modelo->delete_fromadecalificar($id);
 		
 	}
 }

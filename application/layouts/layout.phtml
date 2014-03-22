@@ -14,6 +14,9 @@
 			echo $this->headLink()."\n";
 			$this->headScript()->appendFile($this->baseUrl().'/jquery-ui-1.10.3.custom/js/jquery-1.9.1.js')
 				 ->headScript()->appendFile($this->baseUrl().'/js/src/jquery.easyui.min.js')
+				 ->headScript()->appendFile($this->baseUrl().'/js/src/jquery.edatagrid.js')
+				 ->headScript()->appendFile($this->baseUrl().'/js/src/datagrid-filter.js')
+				  ->headScript()->appendFile($this->baseUrl().'/js/locale/easyui-lang-es.js')
 				 ->headScript()->appendFile($this->baseUrl().'/js/jquery.blockUI.js')
 				 ->headScript()->appendFile($this->baseUrl().'/js/utilerias.js');
 			echo $this->headScript()."\n";  

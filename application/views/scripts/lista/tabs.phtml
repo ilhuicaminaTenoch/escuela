@@ -18,7 +18,26 @@ $rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
 			</thead>
 		</table>
 	</div>
-	<div title="Bimestres" style="padding:10px">
+	<div title="Forma de calificar" style="padding:10px;" id="formaDeCalificar" >
+		<table id="dgformadecalificar" title="Forma de Calificar" style="width:550px;height:250px"
+				toolbar="#toolbarfb" idField="N_ID_FORMA_CALIFICAR"
+				rownumbers="true" fitColumns="true" singleSelect="true">
+			<thead>
+				<tr>				
+					<th field="S_CONCEPTO" width="100" editor="{type:'validatebox',options:{required:true}}">Concepto</th>
+					<th field="N_PORCENTAJE" width="50" editor="{type:'numberbox',options:{required:true}}">Porcentaje</th>					
+				</tr>
+			</thead>
+		</table>
+		<div id="toolbarfb">
+			<a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="javascript:$('#dgformadecalificar').edatagrid('addRow');">Nuevo</a>
+			<a href="#" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="javascript:$('#dgformadecalificar').edatagrid('destroyRow');">Eliminar</a>
+			<a href="#" class="easyui-linkbutton" iconCls="icon-save" plain="true" onclick="javascript:$('#dgformadecalificar').edatagrid('saveRow'); $('#dgformadecalificar').edatagrid('reload');">Guardar</a>
+			<a href="#" class="easyui-linkbutton" iconCls="icon-undo" plain="true" onclick="javascript:$('#dgformadecalificar').edatagrid('cancelRow')">Cancelar</a>
+		</div>
+	</div>
+	<div title="Notas" style="padding:10px">
+	     <?php if ($this->cienPorciento == 100 || $this->cienPorciento == '100'){?>
 		<table id="dgCalificaciones" class="easyui-datagrid" title="Segumiento de calificaciones" style="width:700px;height:250px"
 				data-options="
 						rownumbers:false,
@@ -46,16 +65,26 @@ $rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
                                 required:true
                             }
                         }">Mes</th>
+                        
 					<?php 
 					$contador = 2;
-					foreach($this->titulos as $concepto){?>					
-					<th data-options="field:'nota<?php echo $contador; ?>-<?php echo $concepto['id_formaCalificar']?>-<?php echo $concepto['porcentaje']; ?>',						
+					foreach($this->titulos as $concepto){
+                    if ($concepto['concepto'] == 'Promedio' || $concepto['concepto'] =="promedio") {?>
+                    <th data-options="field:'nota<?php echo $contador; ?>-<?php echo $concepto['id_formaCalificar']?>-<?php echo $concepto['porcentaje']*0.01; ?>',						
 						align:'center',
 						width:150" 
-						editor="{type:'numberbox',options:{precision:1}}"><?php echo ucfirst($concepto['concepto']).'-'.$concepto['porcentaje']; ?></th>
+						editor="{type:'numberbox',options:{precision:1}}"><?php echo ucfirst($concepto['concepto']); ?>
+					</th>
+					<?php }else{?>
+					<th data-options="field:'nota<?php echo $contador; ?>-<?php echo $concepto['id_formaCalificar']?>-<?php echo $concepto['porcentaje']*0.01; ?>',						
+						align:'center',
+						width:150" 
+						editor="{type:'numberbox',options:{precision:1}}"><?php echo ucfirst($concepto['concepto']).'-'.$concepto['porcentaje'] * 0.01 . '%'; ?>
+					</th>
 					<?php 
+					}
 					$contador++;
-					} ?>
+					} ?>					
 				</tr>
 			</thead>
 		</table>		
@@ -149,8 +178,7 @@ $rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
 							campo = selector.attr("field");							
 							separa = campo.split("-");
 							porcentaje = parseFloat(separa[2]);
-							suma = suma + (parseFloat(window['nota'+contador+'Editor'].target.val())) * (porcentaje);
-							//console.log(suma);
+							suma = suma + (parseFloat(window['nota'+contador+'Editor'].target.val())) * (porcentaje);												
 						}	
 					}
 					if(contador == total_editor){
@@ -167,7 +195,13 @@ $rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
 		
 		
 	</script>
+        <?php }else{?>
+        <div id="p" class="easyui-panel" title="Basic Panel" style="width:500px;height:200px;padding:10px;">
+            <p style="font-size:14px">Tienes que completar la Forma De Califica. Actualmente no esta al 100%</p>            
+        </div>
+        <?php }?>
 	</div>
+	
 </div>
 <script type="text/javascript">	
 $(document).ready(function() {	
@@ -240,7 +274,7 @@ $(document).ready(function() {
 			}
 		}
 		json+=']';	
-		//console.log(json);
+		console.log(json);
 		$.ajax({
 			url: '<?php echo $this->url(array('controller' => 'Lista', 'action' => 'guarda'));?>',  
 			async:true,
@@ -263,14 +297,116 @@ $(document).ready(function() {
     });
 	
 	
+	
+	
+	
 });
-
+$(function() {
+	$('#dgformadecalificar').edatagrid({
+		url: '<?php echo $this->url(array('controller'=>'Lista','action'=>'formadecalificar'));?>',		
+		//updateUrl: '<?php //echo $this->url(array('controller'=>'Lista','action'=>'updateformadecalificar'));?>',
+		onDestroy:function(rowIndex, row){		 
+			eliminaformadecalificar('<?php echo $this->url(array('controller'=>'Lista','action'=>'deleteformadecalificar'));?>',row.N_ID_FORMA_CALIFICAR);				
+		 },
+		 onError:function(index,row){
+			 $.messager.alert('Porcentaje Superado',row.msg,'error');			 
+		 },		 
+		 onSave: function (index,row) {			       
+            var total = antesDeGuardar();                                      
+            var actualiza = row.N_ID_FORMA_CALIFICAR;           
+            if(total > 100){
+            	$.messager.alert('Porcentaje Superado','Has sobrepasado el 100% para la evaluacacion','error');
+            }else if(total == 100){
+                //identico a 100
+            	if(typeof actualiza == "undefined"){
+                    //inserta
+            		peticion('<?php echo $this->url(array('controller'=>'Lista','action'=>'saveformadecalificar'));?>',row.N_ID_FORMA_CALIFICAR,row.S_CONCEPTO,row.N_PORCENTAJE);
+                	
+                }else{
+                    //actualiza
+                	peticion('<?php echo $this->url(array('controller'=>'Lista','action'=>'updateformadecalificar'));?>',row.N_ID_FORMA_CALIFICAR,row.S_CONCEPTO,row.N_PORCENTAJE);
+                	
+                }
+            }else{
+                //menor que 100
+            	if(typeof actualiza == "undefined"){
+                    //inserta
+            		peticion('<?php echo $this->url(array('controller'=>'Lista','action'=>'saveformadecalificar'));?>',row.N_ID_FORMA_CALIFICAR,row.S_CONCEPTO,row.N_PORCENTAJE);
+                	
+                }else{
+                    //actualiza
+                	peticion('<?php echo $this->url(array('controller'=>'Lista','action'=>'updateformadecalificar'));?>',row.N_ID_FORMA_CALIFICAR,row.S_CONCEPTO,row.N_PORCENTAJE);
+                	
+                }
+                
+            }
+         },
+         destroyMsg:{
+     		norecord:{	// when no record is selected
+     			title:'Warning',
+     			msg:'No ha seleccionado ninguna fila.'
+     		},
+     		confirm:{	// when select a row
+     			title:'Confirm',
+     			msg:'\u00BF Seguro que desea eliminar este concepto \u003F'
+     		}
+     	}     
+			 
+		
+	});
+});
+function recargaIframe(){
+	var url = $('#control').attr('src'); 
+	console.log($('#control').attr('src'));
+	/*$('#control').attr('src', url);
+    $('#control').reload();*/
+}
+function antesDeGuardar(){	
+	var datagrid = $('#dgformadecalificar').datagrid('getRows');		
+	var longitud = parseInt(datagrid.length);
+	console.log(longitud);
+	var suma = 0;	
+    if(longitud == 1){               
+    	suma = parseInt(datagrid[0]['N_PORCENTAJE']);   	
+    }else{            	
+    	for(var i=0; i<longitud; i++){			
+    		$(".datagrid-btable #datagrid-row-r4-2-"+i+" td[field='N_PORCENTAJE']").each(function(index, value) { 
+    		    var porcentaje = parseInt($(this).text());
+    		    suma = suma + porcentaje;    		   	    
+    		});		
+    	}    	
+    }
+    return parseInt(suma);
+	
+}
 function showLoadingScreen(mensaje){   
     $.blockUI({
         title: 'ATENCION....',
         message:  mensaje  
     }); 
 }
+function peticion(action,id,concepto,porcentaje){
+	$.ajax({
+		url: action,  
+		async:true,
+		data: 'N_ID_FORMA_CALIFICAR='+id+'&S_CONCEPTO='+concepto+'&N_PORCENTAJE='+porcentaje,
+		beforeSend: function(objeto){
+			showLoadingScreen('Enviando Datos');
 
-//$('.datagrid-htable > tbody > tr.datagrid-header-row > td[field="nota1"]')
+		},
+		complete: function(objeto, exito){				
+			$.unblockUI();
+			$('#dgformadecalificar').edatagrid('reload');
+		},
+		contentType: "application/x-www-form-urlencoded",
+		dataType: "html",
+		error: function(objeto, quepaso, otroobj){
+			showLoadingScreen('Estas viendo esto por que fallo la peticion y el error es el siguiente '+quepaso+' error');
+		},		
+		timeout: 3000,
+		type: "POST"
+	});
+}
+
+
 </script>

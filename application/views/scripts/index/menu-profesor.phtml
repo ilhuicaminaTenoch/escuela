@@ -1,0 +1,26 @@
+<div style="background:#fafafa;padding:5px;width:900px;border:1px solid #ccc" id="mm">
+    <a href="#" class="easyui-menubutton" menu="#mm1" iconCls="icon-edit">Pruebas</a>
+    <a href="#" class="easyui-menubutton" menu="#mm2" iconCls="icon-help">Help</a>
+	<a href="#" class="easyui-menubutton" menu="#lista-alumnos" iconCls="icon-book">Lista de Alumnos</a>
+	<a href="#" class="easyui-menubutton" menu="#mm3" iconCls="icon-user"><?php echo Zend_Auth::getInstance()->getIdentity()->S_NOMBRE;?></a>
+</div>
+<div id="lista-alumnos" style="width:75px;">
+	<div iconCls="icon-page-excel" onclick="lista_alumnos(<?php echo Zend_Auth::getInstance()->getIdentity()->N_DATOS_PERSONALES; ?>)">Listado de Grupos</div>
+	
+</div>
+<div id="mm1" style="width:250px;">
+    <div onclick="link('<?php echo $this->url(array('controller' => 'APG', 'action' => 'index')); ?>',<?php echo Zend_Auth::getInstance()->getIdentity()->N_DATOS_PERSONALES; ?>)">Asignacion de Profesores a Grupos</div>
+    <div class="menu-sep"></div>    
+    <div iconCls="icon-remove" onclick="link('<?php echo $this->url(array('controller' => 'Lista', 'action' => 'index')); ?>',<?php echo Zend_Auth::getInstance()->getIdentity()->N_DATOS_PERSONALES; ?>)">Lista Grupos</div>
+    <div onclick="link('<?php echo $this->url(array('controller' => 'Circulares', 'action' => 'index')); ?>',<?php echo Zend_Auth::getInstance()->getIdentity()->N_DATOS_PERSONALES; ?>)">Circulares</div>
+</div>
+
+<div id="mm2" style="width:100px;">
+    <div>Help</div>
+    <div>Update</div>
+    <div>About</div>
+</div>
+
+<div id="mm3" style="width:50pz;">
+	<div iconCls="icon-door-out">Salir</div>
+</div>

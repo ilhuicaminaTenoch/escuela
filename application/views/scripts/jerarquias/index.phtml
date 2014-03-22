@@ -1,23 +1,18 @@
+<?php $rutaPublica =Zend_Registry::get('config')->app->baseUrl;?>
 <div class="easyui-layout" style="width:960px;height:500px;">	
 	<div data-options="region:'center',iconCls:'icon-ok'" title="Jerarquias">
 		<div class="easyui-layout" data-options="fit:true">			
-			<div data-options="region:'west',split:true,border:false" style="width:320px" title="Tipos" id="contenedor-tipos">
-				<select style="width:100%;" size="20" id="Tipos" name="Tipos" onchange="elemento('Tipos','Niveles','<?php echo $this->url(array('controller' => 'Jerarquias', 'action' => 'listaniveles'));?>')">
-					<?php 
-						foreach($this->tipos as $tipo){
-							echo"<option value='{$tipo['id']}'>{$tipo['nombre']}</option>";
-						}
-					?>					
+			<div data-options="region:'center',border:false" style="width:100px;" title="Grupos" id="nivel_2">
+				<select style="width:100%;" size="20" id="Niveles" name="Niveles" onchange="elemento('Niveles','Elementos','<?php echo $this->url(array('controller' => 'Jerarquias', 'action' => 'listaelementos'));?>')">
+					<?php foreach($this->listas as $grupo){
+							echo"<option value='{$grupo['id']}'>{$grupo['nombre']}</option>";
+						}?>
 				</select>
 				<div style="margin:5px auto;">
-					<a href="javascript:void(0)" onclick="nuevoTipo('guardatipos','Tipos');"class="easyui-linkbutton" data-options="iconCls:'icon-add'" style="margin:0 auto">Agregar</a>
-					<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove'" style="margin:0 auto">Borrar</a>
+					<a href="javascript:void(0)" id="boton_Niveles_add" onclick="nuevoTipo('guardagrupos','Grupos');"class="easyui-linkbutton" data-options="iconCls:'icon-add',disabled:false" style="margin:0 auto">Agregar</a>					
 				</div>
 			</div>
-			<div data-options="region:'center',border:false" style="width:320px;" title="Niveles" id="nivel_2">
-				<select style="width:100%;" size="20" id="Niveles" name="Niveles" onchange="elemento('Niveles','Elementos','<?php echo $this->url(array('controller' => 'Jerarquias', 'action' => 'listaelementos'));?>')"></select>				
-			</div>
-			<div data-options="region:'east',split:true,border:false" style="width:320px;" title="Elementos" id="nivel_3">
+			<div data-options="region:'east',split:true,border:false" style="width:770px;" title="Alumnos" id="nivel_3">
 				<select style="width:100%;" size="20" id="Elementos" name="Elementos" multiple></select>
 				<div style="margin:5px auto;">
 					<a href="javascript:void(0)" id="boton_Elementos_add" onclick="nuevoTipo('guardatipos','Elementos');"class="easyui-linkbutton" data-options="iconCls:'icon-add',disabled:true" style="margin:0 auto">Agregar</a>
@@ -33,9 +28,9 @@
 
 <script type="text/javascript">
 	var url;	
-	function nuevoTipo(action,seccion){
+	function nuevoTipo(action,seccion){		
         $('#dlg'+seccion).dialog('open').dialog('setTitle',seccion);		
-        url = "/Jerarquias/"+action;
+        url = "<?php echo $rutaPublica ?>Jerarquias/"+action;
 	}
 	function obtenerElementos(id_grid){
 		var ss = [];
@@ -71,7 +66,26 @@
 			}
 		});
 	}
-	function load(seccion,id_actual,id_padre){
+	function guardaGrupos(){		
+		$('#fmGrupos').form('submit', {
+			url: url,               
+			onSubmit: function() {			  
+				return $(this).form('validate');			   
+			},
+			success: function(data) {				
+			   if(data == '1'){
+				   $.messager.show({  
+						title: 'Error',  
+						msg: 'Este Grupo ya se encuentra registrado.'  
+					});
+				}else if(data == '0'){
+					$('#dlgGrupos').dialog('close');
+					load('Niveles','all');
+				}
+			}
+		});
+	}
+	function load(seccion,id_grupo){
 		$.ajax({
 			url: "<?php echo $this->url(array('controller' => 'Jerarquias', 'action' => 'listaelementos'));?>",
 			async:true,
@@ -92,15 +106,15 @@
 			},
 			timeout: 3000,
 			type: "POST",
-			data: 'id_actual='+id_actual+'&id_padre='+id_padre
+			data: 'id_grupo='+id_grupo
 		});
 	}
 	function elemento(id,seccion,action){		
-		var id_actual = $("#"+id).val(),
-			id_padre = $("#Tipos option:selected").val();					
+		var id_grupo = $("#"+id).val(),
+			id_padre = $("#Tipos option:selected").val();		
 		$.ajax({
 			url: action,
-			data:"id_actual="+id_actual+"&id_padre="+parseInt(id_padre),
+			data:"id_grupo="+id_grupo+"&id_padre="+parseInt(id_padre),
 			async:true,
 			beforeSend: function(objeto){
 				$('#'+seccion).attr('disabled', 'disabled');

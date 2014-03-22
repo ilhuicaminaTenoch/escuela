@@ -35,14 +35,26 @@ class Application_Model_DbTable_Arbol extends Zend_Db_Table_Abstract {
 		return $filas;
 	}
 	
-	public function carga_profesor(){
+	public function carga_profesor($id_profesor){
 		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
-		$query = "SELECT DISTINCT tb_datos_generales.S_NOMBRE as nombre, tb_arbol_amp.id_profesor
+		$query = "SELECT DISTINCT tb_datos_generales.S_NOMBRE as nombre, tb_datos_generales.N_DATOS_PERSONALES AS id_profesor
 				  FROM tb_materias, tb_arbol_amp, tb_profesor, tb_datos_generales
 				  WHERE tb_arbol_amp.id_materia = tb_materias.id 
 				  AND tb_arbol_amp.id_profesor = tb_profesor.N_ID_PROFESOR 
 				  AND tb_profesor.N_DATOS_PERSONALES = tb_datos_generales.N_DATOS_PERSONALES
+		          AND tb_profesor.N_DATOS_PERSONALES = $id_profesor
 				  GROUP BY tb_datos_generales.S_NOMBRE";
+		$filas = $db->fetchAll($query);
+		return $filas;
+	}
+	
+	public function carga_profesores(){
+		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
+		$query = "SELECT DISTINCT tb_datos_generales.S_NOMBRE as nombre, tb_datos_generales.N_DATOS_PERSONALES AS id_profesor
+		FROM tb_materias, tb_arbol_amp, tb_profesor, tb_datos_generales
+		WHERE tb_arbol_amp.id_materia = tb_materias.id
+		AND tb_arbol_amp.id_profesor = tb_profesor.N_ID_PROFESOR
+		AND tb_profesor.N_DATOS_PERSONALES = tb_datos_generales.N_DATOS_PERSONALES";
 		$filas = $db->fetchAll($query);
 		return $filas;
 	}
@@ -61,13 +73,23 @@ class Application_Model_DbTable_Arbol extends Zend_Db_Table_Abstract {
 		$cadena = trim($sql, ',');		
 		$ejecuta = $db->query($cadena);
 	}
-	public function carga_arbol_grupos($id_datos_personales){
+	public function carga_arbol_grupo($id_datos_personales){
 		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
-		$queryGrupos ="SELECT tb_apg.id_grupo, tb_grupo.S_GRUPO AS grupo
-					   FROM tb_apg , tb_grupo , tb_profesor , tb_datos_generales
-					   WHERE tb_apg.id_grupo = tb_grupo.N_ID_GRUPO AND tb_profesor.N_DATOS_PERSONALES = tb_datos_generales.N_DATOS_PERSONALES AND 
-						     tb_apg.id_grupo = tb_grupo.N_ID_GRUPO AND tb_profesor.N_DATOS_PERSONALES = $id_datos_personales AND tb_apg.id_materia != 0 GROUP BY S_GRUPO";
+		$queryGrupos ="SELECT
+                        tb_agp.N_ID_GRUPO as id_grupo,
+                        tb_datos_generales.N_DATOS_PERSONALES as id_profesor,
+                        tb_grupo.S_GRUPO as grupo,
+                        tb_datos_generales.S_NOMBRE as nombre_profesor
+                        FROM
+                        tb_agp ,
+                        tb_profesor ,
+                        tb_grupo ,
+                        tb_datos_generales
+                        WHERE tb_agp.N_ID_GRUPO = tb_grupo.N_ID_GRUPO AND tb_agp.N_ID_PROFESOR = tb_profesor.N_ID_PROFESOR
+                        AND tb_profesor.N_DATOS_PERSONALES = tb_datos_generales.N_DATOS_PERSONALES AND tb_datos_generales.N_DATOS_PERSONALES = $id_datos_personales";
 		$filas = $db->fetchAll($queryGrupos);
 		return $filas;
 	}
+	
+	
 }

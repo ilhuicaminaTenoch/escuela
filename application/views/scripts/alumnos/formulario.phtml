@@ -1,3 +1,6 @@
+<?php 
+$rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
+?>
 <div id="dlg" class="easyui-dialog" style="width:1000px;height:480px;padding:10px 20px" closed="true" buttons="#dlg-buttons" modal="true">
     <div class="container_12">
         <div id="layout-alumnos" class="easyui-layout" style="width:960px;height:380px;">
@@ -82,7 +85,7 @@
 				$('#N_ID_PERIFL').attr('value','1');
                 var nombre_foto= $('#S_FOTO').val();
                 $("#vista-previa").css({
-                    'background-image': 'url(http://escuela/fotos/'+nombre_foto+')',
+                    'background-image': "url(<?php echo $rutaPublica.'fotos/'; ?>"+nombre_foto+")",
                     'background-size': '100px 100px',
                     'background-repeat': 'no-repeat'
                 });
@@ -98,14 +101,14 @@
                     return $(this).form('validate');
                    
                 },
-                success: function(result) {
-                    //console.log(result);
-                   if(result == '0'){
+                success: function(data) {
+                    console.log(data);
+                   if(data == '0' || data == 0){
                        $.messager.show({  
-	                	title: 'Error',  
-	                    msg: 'Este Alumno ya se encuentra registrado.'  
-	                });
-                   }else if(result == '1'){
+	                	  title: 'Error',  
+	                       msg: 'Este Alumno ya se encuentra registrado.'  
+	                   });
+                   }else if(data == '1' || data == 1){
                         $('#dlg').dialog('close');        // close the dialog
                         $('#dg').datagrid('reload');    // reload the user data
                    }

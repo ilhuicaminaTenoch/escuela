@@ -5,35 +5,55 @@
  * @author manuel.moreno
  */
 class APGController extends Application_Model_Filter {
-	public function  indexAction(){			
+	public function  indexAction(){
+	    $IdProfesor = Zend_Auth::getInstance()->getIdentity()->N_DATOS_PERSONALES;
 		$this->_helper->_layout->setLayout('layout_APG');
 		$modelo = new Application_Model_DbTable_APG();		
-		$modelo2 = new Application_Model_DbTable_Arbol();		
+		$modelo2 = new Application_Model_DbTable_Arbol();
+		$modelo3 = new Application_Model_DbTable_AGP();		
 		$_GET = $this->filter->process($_GET);
-		$id_grupo = isset($_GET['grupo']) ? addslashes($this->entityFilter->filter($this->sql_command($_GET['grupo']))):'';
+		$idCombo = isset($_GET['idCombo']) ? addslashes($this->entityFilter->filter($this->sql_command($_GET['idCombo']))) : '';
+		$idProfesor = isset($_GET['idProfesor']) ? addslashes($this->entityFilter->filter($this->sql_command($_GET['idProfesor']))) : '';
+		$sessionPerfiles = new Zend_Session_Namespace('perfiles');
+		$perfil = $sessionPerfiles->perfil;		
+	    if($perfil == 3 && $idProfesor !=''){	        
+	        $profesores = $modelo2->carga_profesores();
+	        $cargaCombo =  $modelo->carga_combo('', '');
+	        
+	    }elseif ($perfil == 3) {
+		  	$profesores = $modelo2->carga_profesores();
+		  	$cargaCombo = $modelo2->carga_profesores();		  		  	
+		}else{
+		    $profesores = $modelo2->carga_profesor($IdProfesor);
+		    $cargaCombo = $modelo->carga_combo($IdProfesor, '');
+		   
+		}
+		$contenedor = array();
+		foreach($profesores as $hijos){
+			$contenedor[$hijos['nombre'].'_'.$hijos['id_profesor']] = $modelo->carga_materias($hijos['id_profesor']);
+		}
+		$this->view->arreglo = $contenedor;
 		
-		$profesores = $modelo2->carga_profesor();
-		$contenedor = array();		
-		foreach($profesores as $hijos){			
-			$contenedor[$hijos['nombre'].'_'.$hijos['id_profesor']] = $modelo->carga_materias($hijos['nombre']);			
+		
+		$this->view->listaCombo = $cargaCombo;
+		if ($idCombo == '') {
+		    $horas = $modelo->carga_horas();
+		    $this->view->datos = $horas;
+		    $this->view->validacion = 1;
+		}else{       		    
+    	    $grupoSeleccionado = $modelo->carga_combo($idCombo, '');
+    		$datos = $modelo->carga_datos($idCombo);
+    		$this->view->datos = $datos;
+    		$this->view->sgrupo = $grupoSeleccionado;
+    		
+    		//die();
+    		$horas = $modelo->carga_horas();
+    		
+    		$this->view->horas = $horas;
+    		$this->view->validacion = 2;
+    		$this->view->grupo=$idCombo;
 		}
-		$this->view->arreglo = $contenedor;		
-		$modelo3 = new Application_Model_DbTable_Jerarquias();
-		$grupos = $modelo3->lista_maestros(2);
-		$this->view->grupos = $grupos;
-		if($id_grupo == ''){								
-			$horas = $modelo->carga_horas();
-			$this->view->datos = $horas;
-			$this->view->validacion = 1;
-		}else{			
-			$datos = $modelo->carga_datos($id_grupo);
-			$this->view->datos = $datos;			
-			$horas = $modelo->carga_horas();
-			$this->view->horas = $horas;
-			$this->view->validacion = 2;
-			$this->view->grupo=$id_grupo;
-			
-		}
+		
 	}
 	
 	public function guardaAction(){
@@ -64,5 +84,19 @@ class APGController extends Application_Model_Filter {
 		}
 	}
 	
-	
+	public function cargacomboAction(){
+	    if ($this->getRequest()->isXmlHttpRequest()){
+	        $this->_helper->layout->disableLayout();
+	       // $this->getHelper("viewRenderer")->setNoRender();
+	        $_POST = $this->filter->process($_POST);
+	        $idCombo = isset($_POST['idCombo']) ? addslashes($this->entityFilter->filter($this->sql_command($_POST['idCombo']))) : '';
+	        $combo_a_cargar = isset($_POST['combo_a_cargar']) ? addslashes($this->entityFilter->filter($this->sql_command($_POST['combo_a_cargar']))) : '';
+	        $idProfesor = isset($_POST['idProfesor']) ? addslashes($this->entityFilter->filter($this->sql_command($_POST['idProfesor']))) : '';
+	        $modelo = new Application_Model_DbTable_APG();
+	        $combo = $modelo->carga_combo($idCombo, $combo_a_cargar);
+	        $this->view->listaCombo = $combo;
+	        
+	    }
+	    
+	}	
 }

@@ -55,13 +55,15 @@
 				menu[0].originalWidth = width || 0;
 				menu.children('div').each(function(){
 					var item = $(this);
-					if (item.hasClass('menu-sep')){
-//						item.html('&nbsp;');
-					} else {
-						var itemOpts = $.extend({}, $.parser.parseOptions(this,['name','iconCls','href']), {
-							disabled: (item.attr('disabled') ? true : undefined)
-						});
-						item.attr('name',itemOpts.name || '').attr('href',itemOpts.href || '');
+					var itemOpts = $.extend({}, $.parser.parseOptions(this,['name','iconCls','href',{separator:'boolean'}]), {
+						disabled: (item.attr('disabled') ? true : undefined)
+					});
+					if (itemOpts.separator){
+						item.addClass('menu-sep');
+					}
+					if (!item.hasClass('menu-sep')){
+						item[0].itemName = itemOpts.name || '';
+						item[0].itemHref = itemOpts.href || '';
 						
 						var text = item.addClass('menu-item').html();
 						item.empty().append($('<div class="menu-text"></div>').html(text));
@@ -89,23 +91,30 @@
 	
 	function setMenuWidth(target, menu){
 		var opts = $.data(target, 'menu').options;
-		var d = menu.css('display');
+//		var d = menu.css('display');
+		var style = menu.attr('style');
 		menu.css({
 			display: 'block',
-			left:-10000
+			left:-10000,
+			height: 'auto',
+			overflow: 'hidden'
 		});
 		
-		menu.find('div.menu-item')._outerHeight(22);
+//		menu.find('div.menu-item')._outerHeight(22);
 		var width = 0;
 		menu.find('div.menu-text').each(function(){
 			if (width < $(this)._outerWidth()){
 				width = $(this)._outerWidth();
 			}
+			$(this).closest('div.menu-item')._outerHeight($(this)._outerHeight()+2);
 		});
 		width += 65;
 		menu._outerWidth(Math.max((menu[0].originalWidth || 0), width, opts.minWidth));
 		
-		menu.css('display', d);
+		menu.children('div.menu-line')._outerHeight(menu.outerHeight());
+		
+//		menu.css('display', d);
+		menu.attr('style', style);
 	}
 	
 	/**
@@ -119,9 +128,11 @@
 				state.timer = null;
 			}
 		}).bind('mouseleave.menu', function(){
-			state.timer = setTimeout(function(){
-				hideAll(target);
-			}, 100);
+			if (state.options.hideOnUnhover){
+				state.timer = setTimeout(function(){
+					hideAll(target);
+				}, 100);
+			}
 		});
 	}
 	
@@ -129,6 +140,7 @@
 	 * bind menu item event
 	 */
 	function bindMenuItemEvent(target, item){
+		if (!item.hasClass('menu-item')){return}
 		item.unbind('.menu');
 		item.bind('click.menu', function(){
 			if ($(this).hasClass('menu-item-disabled')){
@@ -207,23 +219,26 @@
 	 */
 	function showMenu(target, param){
 		var left,top;
+		param = param || {};
 		var menu = $(param.menu || target);
 		if (menu.hasClass('menu-top')){
 			var opts = $.data(target, 'menu').options;
+			$.extend(opts, param);
 			left = opts.left;
 			top = opts.top;
-			if (param.alignTo){
-				var at = $(param.alignTo);
+			if (opts.alignTo){
+				var at = $(opts.alignTo);
 				left = at.offset().left;
 				top = at.offset().top + at._outerHeight();
 			}
-			if (param.left != undefined){left = param.left}
-			if (param.top != undefined){top = param.top}
+//			if (param.left != undefined){left = param.left}
+//			if (param.top != undefined){top = param.top}
 			if (left + menu.outerWidth() > $(window)._outerWidth() + $(document)._scrollLeft()){
 				left = $(window)._outerWidth() + $(document).scrollLeft() - menu.outerWidth() - 5;
 			}
 			if (top + menu.outerHeight() > $(window)._outerHeight() + $(document).scrollTop()){
-				top -= menu.outerHeight();
+//				top -= menu.outerHeight();
+				top = $(window)._outerHeight() + $(document).scrollTop() - menu.outerHeight() - 5;
 			}
 		} else {
 			var parent = param.parent;	// the parent menu item
@@ -297,6 +312,7 @@
 	
 	function setDisabled(target, itemEl, disabled){
 		var t = $(itemEl);
+		if (!t.hasClass('menu-item')){return}
 		
 		if (disabled){
 			t.addClass('menu-item-disabled');
@@ -324,12 +340,16 @@
 			}
 			menu = param.parent.submenu;
 		}
-		var item = $('<div class="menu-item"></div>').appendTo(menu);
-		$('<div class="menu-text"></div>').html(param.text).appendTo(item);
+		if (param.separator){
+			var item = $('<div class="menu-sep"></div>').appendTo(menu);
+		} else {
+			var item = $('<div class="menu-item"></div>').appendTo(menu);
+			$('<div class="menu-text"></div>').html(param.text).appendTo(item);
+		}
 		if (param.iconCls) $('<div class="menu-icon"></div>').addClass(param.iconCls).appendTo(item);
 		if (param.id) item.attr('id', param.id);
-		if (param.href) item.attr('href', param.href);
-		if (param.name) item.attr('name', param.name);
+		if (param.name){item[0].itemName = param.name}
+		if (param.href){item[0].itemHref = param.href}
 		if (param.onclick){
 			if (typeof param.onclick == 'string'){
 				item.attr('onclick', param.onclick);
@@ -337,13 +357,10 @@
 				item[0].onclick = eval(param.onclick);
 			}
 		}
-		if (param.handler) item[0].onclick = eval(param.handler);
+		if (param.handler){item[0].onclick = eval(param.handler)}
+		if (param.disabled){setDisabled(target, item[0], true)}
 		
 		bindMenuItemEvent(target, item);
-		
-		if (param.disabled){
-			setDisabled(target, item[0], true);
-		}
 		bindMenuEvent(target, menu);
 		setMenuWidth(target, menu);
 	}
@@ -460,8 +477,10 @@
 				id: t.attr('id'),
 				text: $.trim(t.children('div.menu-text').html()),
 				disabled: t.hasClass('menu-item-disabled'),
-				href: t.attr('href'),
-				name: t.attr('name'),
+//				href: t.attr('href'),
+//				name: t.attr('name'),
+				name: itemEl.itemName,
+				href: itemEl.itemHref,
 				onclick: itemEl.onclick
 			}
 			var icon = t.children('div.menu-icon');
@@ -508,7 +527,7 @@
 	};
 	
 	$.fn.menu.parseOptions = function(target){
-		return $.extend({}, $.parser.parseOptions(target, ['left','top',{minWidth:'number'}]));
+		return $.extend({}, $.parser.parseOptions(target, ['left','top',{minWidth:'number',hideOnUnhover:'boolean'}]));
 	};
 	
 	$.fn.menu.defaults = {
@@ -516,6 +535,7 @@
 		left: 0,
 		top: 0,
 		minWidth: 120,
+		hideOnUnhover: true,	// Automatically hides the menu when mouse exits it
 		onShow: function(){},
 		onHide: function(){},
 		onClick: function(item){}

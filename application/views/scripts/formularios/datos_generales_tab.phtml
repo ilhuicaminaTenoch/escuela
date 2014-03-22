@@ -1,3 +1,4 @@
+<?php $rutaPublica =Zend_Registry::get('config')->app->baseUrl; ?>
 <div title="Datos Personales" style="padding:10px;" id="alumnos_datos1">            
     <div class="grid_3">
         <div class="fitem">
@@ -78,8 +79,31 @@
     </div>
 </div>
 <?php $timestamp = time(); ?>
-<script type="text/javascript" src="/js/datos_generales.js"></script>
+<script type="text/javascript" src="<?php echo $rutaPublica ?>js/datos_generales.js"></script>
 <script>
+    function consulta_cp() {
+            var cp = $('#cp').val();
+            $.ajax({
+                async: true,
+                cache: false,
+                type: "POST",
+                datatype: "html",
+                contentType: "application/x-www-form-urlencoded",
+                url: '<?php echo $this->url(array('controller'=>'Alumnos','action'=>'buscacp'));?>',
+                data: "cp=" + cp,
+                beforeSend: function() {
+                    $("#contenedor_cp").text('Cargando...');
+                },
+                success: function(datos) {
+                    $("#contenedor_cp").html(datos);
+                },
+                timeout: 4000,
+                error: function(xhr, ajaxOptions, thrownError) {
+                    alert('ESTATUS: ' + xhr.status + '' + 'ERROR: ' + thrownError);
+                }
+            });
+        }
+
 $('#file_upload').uploadify({
     'buttonText': 'Buscar Foto...',
     'queueID': 'vista-previa',
@@ -87,19 +111,19 @@ $('#file_upload').uploadify({
     /*'fileSizeLimit' : '3MB',
      'fileTypeDesc' : 'Image Files',
      'fileTypeExts' : '.jpg;',*/
-    'cancelImg': '/imagenes/uploadify-cancel.png',
+    'cancelImg': '<?php echo $rutaPublica ?>imagenes/uploadify-cancel.png',
     'formData': {
         'timestamp':'<?php echo $timestamp; ?>' ,
         'token': '<?php echo md5('unique_salt' . $timestamp); ?>'
     },
-    'swf': 'http://escuela/js/uploadify.swf',
-    'uploader': '<?php echo $this->url(array('controller' => 'Alumnos', 'action' => 'uploadify')); ?>',
+    'swf': '<?php echo $rutaPublica ?>js/uploadify.swf',
+    'uploader': '<?php echo $rutaPublica?>alumnos/subefoto',
     'onUploadSuccess': function(file, data, response) {
         switch (data) {
             case '1':
                 $.messager.alert('OK', 'El archivo ' + file.name + ' se subio correctamente', 'info');
                 $("#vista-previa").css({
-                    'background-image': 'url(http://escuela/fotos/<?php echo $timestamp . '.jpg'; ?>)',
+                    'background-image': 'url(<?php echo $rutaPublica ?>fotos/<?php echo $timestamp . '.jpg'; ?>)',
                     'background-size': '100px 100px',
                     'background-repeat': 'no-repeat'
                 });
@@ -116,4 +140,13 @@ $('#file_upload').uploadify({
 
     }
  });
+
+$('#N_ID_PAIS').combobox({
+    url: '<?php echo $this->url(array('controller'=>'Alumnos','action'=>'consultapais'))?>',
+    valueField: 'Code',
+    textField: 'Name',
+    required: true
+});
+
+
 </script>

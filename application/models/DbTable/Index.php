@@ -1,10 +1,10 @@
 <?php 
 class Application_Model_DbTable_Index extends Zend_Db_Table_Abstract
 {
-	public function checa()
+	public function obtiene_perfil($usuario,$contrasena)
 	{
 		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
-		$query = "SELECT S_USUARIO AS usuario, S_CONTRASENA AS contrasena , COUNT(*) AS total FROM tb_datos_generales WHERE S_USUARIO = 'fer' AND S_CONTRASENA = 'feramra'";
+		$query = "SELECT N_ID_PERIFL AS perfil FROM tb_datos_generales WHERE S_USUARIO = '$usuario' AND S_CONTRASENA = '$contrasena'";
 		$filas = $db->fetchAll($query);
 		return $filas;
 	}

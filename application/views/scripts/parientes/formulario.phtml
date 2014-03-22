@@ -1,3 +1,4 @@
+<?php $rutaPublica =Zend_Registry::get('config')->app->baseUrl;?>
 <div id="dlg" class="easyui-dialog" style="width:1000px;height:480px;padding:10px 20px" closed="true" buttons="#dlg-buttons" modal="true">
     <div class="container_12">
         <div id="layout-alumnos" class="easyui-layout" style="width:960px;height:380px;">
@@ -32,7 +33,7 @@
 									<input name="S_PUESTO" style="width:224px;" id="S_PUESTO" class="easyui-validatebox" data-options="missingMessage:'Este campo es obligatorio'">
 								</div>
 								<div class="fitem">
-                                    <label>Tipo Pariente</label>
+                                    <label>Parentesco</label>
 									<select class="easyui-combobox" name="ID_PARIENTE" id="ID_PARIENTE" style="width:224px;" data-options="missingMessage:'Este campo es obligatorio'">
 										<?php 
 										foreach($this->lista_padres as $llave => $valor){																				
@@ -93,7 +94,7 @@
 				$('#N_ID_PERIFL').attr('value','3');
                 var nombre_foto = $('#S_FOTO').val();
                 $("#vista-previa").css({
-                    'background-image': 'url(http://escuela/fotos/' + nombre_foto + ')',
+                    'background-image': 'url(<?php echo $rutaPublica?>fotos/' + nombre_foto + ')',
                     'background-size': '100px 100px',
                     'background-repeat': 'no-repeat'
                 });
@@ -109,13 +110,13 @@
                     return $(this).form('validate');
 
                 },
-                success: function(result) {
-                    if (result == '0') {
+                success: function(data) {
+                    if (data == '0' || data == 0) {
                         $.messager.show({
                             title: 'Error',
                             msg: 'Este Pariente ya se encuentra registrado.'
                         });
-                    } else if (result == '1') {
+                    } else if (data == '1' || data == 1) {
                         $('#dlg').dialog('close');        // close the dialog
                         $('#dg').datagrid('reload');    // reload the user data
                     }
@@ -143,13 +144,7 @@
         }
 
         $(function() {
-
-            var pager = $('#dg').datagrid('getPager');
-            pager.pagination({
-                displayMsg: 'Mostrando {from} a {to} de {total} elementos',
-                beforePageText: 'Paginas',
-                afterPageText: ' de {pages}'
-            });
+            
 			$('#N_ID_GRADO_ESTUDIO').combo({  
 				required:true,
 				editable: false,

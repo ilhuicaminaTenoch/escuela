@@ -1,0 +1,35 @@
+<div class="easyui-layout" style="width:800px;height:550px;">        
+    <div data-options="region:'west',split:true" title="Grupos" style="width:100px;">
+        <ul>
+            <?php foreach ($this->grupos as $grupo){
+            echo"<li><a href='#' onclick='carga_materias({$grupo['N_ID_GRUPO']})'>{$grupo['S_GRUPO']}</a></li>";
+            }?>
+        </ul>
+    </div>
+    <div data-options="region:'center',title:'Horario',iconCls:'icon-ok'" id="contenedor-materias">
+        
+    </div>
+</div>
+<script>
+            function carga_materias(idGrupo){
+            	$.ajax({
+        			url: '<?php echo $this->url(array('controller' => 'CHP', 'action' => 'consulta'));?>',  
+        			async:true,
+        			data: 'idGrupo='+idGrupo,
+        			beforeSend: function(objeto){
+        				$('#contenedor-materias').text('Buscando......');
+        			},
+        		    success: function(data) {			
+        				$('#contenedor-materias').html(data);
+        				
+        			},
+        			contentType: "application/x-www-form-urlencoded",
+        			dataType: "html",
+        			error: function(objeto, quepaso, otroobj){				
+        				alerta('ERROR.','Estas viendo esto por que fallo la peticion y el error es el siguiente '+quepaso,'error');
+        			},        			
+        			timeout: 3000,
+        			type: "POST"
+        		});                
+            }
+</script>

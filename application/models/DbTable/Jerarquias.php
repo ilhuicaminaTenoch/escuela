@@ -7,13 +7,9 @@ class Application_Model_DbTable_Jerarquias extends Zend_Db_Table_Abstract {
 		return $filas;
 	}
 	
-	public function lista_maestros($id_padre){
-		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
-		if($id_padre == 1 || $id_padre == '1'){//MAESTROS
-			$sql="select S_NOMBRE as nombre, N_DATOS_PERSONALES as id from tb_datos_generales where N_ID_PERIFL = 2 order by S_NOMBRE";
-		}else if($id_padre == 2 || $id_padre == '2'){//GRUPOS
-			$sql="select N_ID_GRUPO as id, S_GRUPO as nombre from tb_grupo ORDER BY S_GRUPO";
-		}
+	public function lista_grupos(){		
+		$db = Zend_Db_Table_Abstract::getDefaultAdapter();		
+		$sql="select N_ID_GRUPO as id, S_GRUPO as nombre from tb_grupo ORDER BY S_GRUPO";		
 		$filas = $db->fetchAll($sql);
 		return $filas;
 	}
@@ -25,20 +21,23 @@ class Application_Model_DbTable_Jerarquias extends Zend_Db_Table_Abstract {
 		return $filas;
 	}
 	
-	public function lista_elementos($id_padre,$id_profesor){
+	public function lista_elementos($id_grupo){
 		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
-		if($id_padre == 1 || $id_padre == '1'){//MAESTROS
-			$sql="select N_MATERIA_ASIGNADA as id_materia FROM tb_profesor where N_ID_PROFESOR = $id_profesor";
-		}else if($id_padre == 2 || $id_padre == '2'){//GRUPOS
-			$sql="SELECT tb_alumno.N_DATOS_PERSONALES as id, tb_datos_generales.S_NOMBRE as nombre, tb_grupo.S_GRUPO as grupo, tb_datos_generales.S_CURP AS CURP,
-				  tb_datos_generales.D_FECHA_NACIMIENTO AS fn
-				 FROM tb_alumno, tb_datos_generales, tb_grupo
-				 WHERE tb_alumno.N_DATOS_PERSONALES = tb_datos_generales.N_DATOS_PERSONALES 
-				 AND tb_alumno.N_ASIGNADO = tb_grupo.N_ID_GRUPO
-				 AND tb_grupo.N_ID_GRUPO= '$id_profesor'";
-		}
-		$filas = $db->fetchAll($sql);
-		return $filas;
+		if($id_grupo == 'all'){
+			$grupos = $this->lista_grupos();
+			return $grupos;
+		}else{
+			$sql="SELECT tb_alumno.N_DATOS_PERSONALES as id, int_cap(tb_datos_generales.S_NOMBRE) as nombre, tb_grupo.S_GRUPO as grupo, tb_datos_generales.S_CURP AS CURP,
+					  tb_datos_generales.D_FECHA_NACIMIENTO AS fn, tb_alumno.ID_ALUMNO AS id_alumno, tb_datos_generales.S_CORREO as email
+					 FROM tb_alumno, tb_datos_generales, tb_grupo
+					 WHERE tb_alumno.N_DATOS_PERSONALES = tb_datos_generales.N_DATOS_PERSONALES 
+					 AND tb_alumno.N_ASIGNADO = tb_grupo.N_ID_GRUPO
+					 AND tb_grupo.N_ID_GRUPO= '$id_grupo'";
+			
+			$filas = $db->fetchAll($sql);
+			return $filas;
+		}		
+		
 	}
 	
 	public function guarda_tipo($id_padre,$id_hijo,$id_alumnos){
@@ -88,4 +87,23 @@ class Application_Model_DbTable_Jerarquias extends Zend_Db_Table_Abstract {
 			$db->query($query);
 		}	
 	}
+	
+	public function guarda_grupo($sGrupo,$estatus,$ciclo){
+		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
+		$query = "CALL guarda_grupo('".strtoupper($sGrupo)."',1,1)";
+		$ejecuta = $db->fetchAll($query);
+		return $ejecuta[0]['resultado'];
+	}
+    
+    public function lista_maestros($id_padre){
+		$db = Zend_Db_Table_Abstract::getDefaultAdapter();
+		if($id_padre == 1 || $id_padre == '1'){//MAESTROS
+			$sql="select S_NOMBRE as nombre, N_DATOS_PERSONALES as id from tb_datos_generales where N_ID_PERIFL = 2 order by S_NOMBRE";
+		}else if($id_padre == 2 || $id_padre == '2'){//GRUPOS
+			$sql="select N_ID_GRUPO as id, S_GRUPO as nombre from tb_grupo ORDER BY S_GRUPO";
+		}
+		$filas = $db->fetchAll($sql);
+		return $filas;
+	}
+	
 }

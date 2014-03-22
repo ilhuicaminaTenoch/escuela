@@ -24,10 +24,12 @@
 				'<div style="clear:both"></div>' +
 				'<input type="hidden" class="slider-value">' +
 				'</div>').insertAfter(target);
-		var name = $(target).hide().attr('name');
+		var t = $(target);
+		t.addClass('slider-f').hide();
+		var name = t.attr('name');
 		if (name){
 			slider.find('input.slider-value').attr('name', name);
-			$(target).removeAttr('name').attr('sliderName', name);
+			t.removeAttr('name').attr('sliderName', name);
 		}
 		return slider;
 	}
@@ -138,6 +140,9 @@
 					return false;
 				}
 			},
+			onBeforeDrag:function(){
+				state.isDragging = true;
+			},
 			onStartDrag:function(){
 				opts.onSlideStart.call(target, opts.value);
 			},
@@ -145,7 +150,16 @@
 				var value = pos2value(target, (opts.mode=='h'?e.data.left:e.data.top));
 				adjustValue(value);
 				opts.onSlideEnd.call(target, opts.value);
+				opts.onComplete.call(target, opts.value);
+				state.isDragging = false;
 			}
+		});
+		slider.find('div.slider-inner').unbind('.slider').bind('mousedown.slider', function(e){
+			if (state.isDragging){return}
+			var pos = $(this).offset();
+			var value = pos2value(target, (opts.mode=='h'?(e.pageX-pos.left):(e.pageY-pos.top)));
+			adjustValue(value);
+			opts.onComplete.call(target, opts.value);
 		});
 		
 		function adjustValue(value){
@@ -265,6 +279,7 @@
 			opts.max = parseFloat(opts.max);
 			opts.value = parseFloat(opts.value);
 			opts.step = parseFloat(opts.step);
+			opts.originalValue = opts.value;
 			
 			buildSlider(this);
 			showRule(this);
@@ -293,6 +308,18 @@
 		setValue: function(jq, value){
 			return jq.each(function(){
 				setValue(this, value);
+			});
+		},
+		clear: function(jq){
+			return jq.each(function(){
+				var opts = $(this).slider('options');
+				setValue(this, opts.min);
+			});
+		},
+		reset: function(jq){
+			return jq.each(function(){
+				var opts = $(this).slider('options');
+				setValue(this, opts.originalValue);
 			});
 		},
 		enable: function(jq){
@@ -335,6 +362,7 @@
 		tipFormatter: function(value){return value},
 		onChange: function(value, oldValue){},
 		onSlideStart: function(value){},
-		onSlideEnd: function(value){}
+		onSlideEnd: function(value){},
+		onComplete: function(value){}
 	};
 })(jQuery);

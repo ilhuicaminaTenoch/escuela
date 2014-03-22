@@ -41,11 +41,12 @@ class AlumnosController extends Application_Model_Filter {
         echo $consulta = Zend_Json::encode($modelo->consulta_grado());
     }
 
-    public function uploadifyAction() {
+    public function subefotoAction() {
+        $rutaFotos =Zend_Registry::get('config')->app->baseUrlFotos;
         $this->getHelper("viewRenderer")->setNoRender();
         $this->_helper->layout->disableLayout();
-        $folder = '../fotos';
-        $verifyToken = md5('unique_salt' . $_POST['timestamp']);
+       $folder = $rutaFotos;
+       $verifyToken = md5('unique_salt' . $_POST['timestamp']);
         if (!empty($_FILES) && $_POST['token'] == $verifyToken) {                     
             $imagen = $_FILES['Filedata']['name'];
             $tempFile = $_FILES['Filedata']['tmp_name'];
@@ -131,7 +132,7 @@ class AlumnosController extends Application_Model_Filter {
         $S_FOTO = isset($_POST['S_FOTO']) ? addslashes($this->entityFilter->filter($this->sql_command($_POST['S_FOTO']))) : '';
         $S_CORREO = isset($_POST['S_CORREO']) ? addslashes($this->entityFilter->filter($this->sql_command($_POST['S_CORREO']))) : '';
         $S_USUARIO = isset($_POST['S_USUARIO']) ? addslashes($this->entityFilter->filter($this->sql_command($_POST['S_USUARIO']))) : '';
-        $S_CONTRASENA = isset($_POST['S_CONTRASENA']) ? addslashes($this->entityFilter->filter($this->sql_command($_POST['S_CONTRASENA']))) : '';
+        $S_CONTRASENA = isset($_POST['S_CONTRASENA']) ? addslashes($this->entityFilter->filter($this->sql_command(md5($_POST['S_CONTRASENA'])))) : '';
         $S_SEXO = isset($_POST['S_SEXO']) ? addslashes($this->entityFilter->filter($this->sql_command($_POST['S_SEXO']))) : '';        
         $N_ID_GRUPO = isset($_POST['N_ID_GRUPO']) ? addslashes($this->entityFilter->filter($this->sql_command($_POST['N_ID_GRUPO']))) : '';
         $N_ID_GRADO = isset($_POST['N_ID_GRADO']) ? addslashes($this->entityFilter->filter($this->sql_command($_POST['N_ID_GRADO']))) : '';
@@ -148,7 +149,7 @@ class AlumnosController extends Application_Model_Filter {
 		$ID_PARIENTE= isset($_POST['ID_PARIENTE']) ? addslashes($this->entityFilter->filter($this->sql_command($_POST['ID_PARIENTE']))) : '';
         $ID_PADRE = isset($_POST['N_ID_PARIENTE']) ? addslashes($this->entityFilter->filter($this->sql_command($_POST['N_ID_PARIENTE']))) : '';
 		$modelo = new Application_Model_DbTable_Alumnos();		
-        echo $modelo->guarda($N_ID_PERIFL, $S_NOMBRE, $S_CALLE, $S_NUMERO_INTERIOR, $S_NUMERO_EXTERIOR, $N_ID_CP, $N_ID_PAIS, $N_ID_ESTATUS, $D_FECHA_NACIMIENTO, $D_FECHA_INGRESO, $S_MATRICULA, $S_CURP, $S_FOTO, $S_CORREO, $S_USUARIO, md5($S_CONTRASENA), $S_SEXO, $S_NOTA, $BANDERA,$ID_DATOS_GENERALES,$TIPO,$GRADO_ESTUDIO,$SUELDO,$NIVEL_PUESTO,$LUGAR_TRABAJO,$SUELDO,$PUESTO,$ID_PARIENTE,$ID_PADRE); 
+        echo $modelo->guarda($N_ID_PERIFL, $S_NOMBRE, $S_CALLE, $S_NUMERO_INTERIOR, $S_NUMERO_EXTERIOR, $N_ID_CP, $N_ID_PAIS, $N_ID_ESTATUS, $D_FECHA_NACIMIENTO, $D_FECHA_INGRESO, $S_MATRICULA, $S_CURP, $S_FOTO, $S_CORREO, $S_USUARIO, $S_CONTRASENA, $S_SEXO, $S_NOTA, $BANDERA,$ID_DATOS_GENERALES,$TIPO,$GRADO_ESTUDIO,$SUELDO,$NIVEL_PUESTO,$LUGAR_TRABAJO,$SUELDO,$PUESTO,$ID_PARIENTE,$ID_PADRE); 
     }  
     
     public function eliminaAction() {

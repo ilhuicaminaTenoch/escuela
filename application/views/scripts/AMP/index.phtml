@@ -5,7 +5,7 @@ $total_materias = count($this->materias);
 ?>
 <style>
 	.elimina{
-		margin:0 auto;
+		margin:358px auto;
 		width:150px;
 		height:150px;
 		background:url(<?php echo $rutaImgane.'/basura.jpg'?>) no-repeat scroll -133px 0 transparent;
@@ -15,7 +15,7 @@ $total_materias = count($this->materias);
 	}
 	
 </style>
-<div class="grid_2">
+<div class="grid_2" style="height: 350px; overflow: scroll;">
 	<input type="hidden" value="<?php echo $total_materias;?>" id="total_materias"/>
 	<ul id="contenedor_materias">
 		<?php
@@ -25,7 +25,7 @@ $total_materias = count($this->materias);
 		?>
 	</ul>
 </div>
-<div class="grid_10">
+<div class="grid_10"  style="height: 350px; overflow: scroll;">
 	<table id="asignaciones">
 		<tr>
 			<td>Profesores </td>
@@ -75,8 +75,9 @@ $total_materias = count($this->materias);
 	</table> 
 	
 	<a href="#" id="save" class="easyui-linkbutton" onclick="guardar();" iconCls="icon-save" style="margin-top: 10px;">Guardar</a>  
-	<div class="elimina"></div>
+	
 	</div>
+	<div class="elimina"></div>
 <script>	
 	function carga_json(){
 		var base_url='<?php echo $rutaPublica?>AsignacionesProfesorMaterias.json';
@@ -181,7 +182,7 @@ $total_materias = count($this->materias);
 			revert:true,
 			proxy:'clone'
 		});	
-		$('.grid_10 .elimina').droppable({			            
+		$('.elimina').droppable({			            
 			onDragEnter:function(e,source){				
 				$(this).addClass('bote-rojo');				
 			},

@@ -1,4 +1,7 @@
-<?php $timestamp_excel = time(); ?>
+<?php $timestamp_excel = time(); 
+$rutaImgane = Zend_Registry::get('config')->app->Imagenes;
+$rutaPublica =	Zend_Registry::get('config')->app->baseUrl;
+?>
 <div id="dlg_file" class="easyui-dialog" style="width:400px;height:280px;padding:10px 20px" closed="true" modal="true">
     <input id="file_upload_excel" name="file_upload_excel" type="file">
      <a href="javascript:$('#file_upload_excel').uploadify('upload')" class="boton-file">Subir archivo</a>
@@ -17,12 +20,12 @@ $(function() {
         'fileTypeExts' : '.xlsx;',
         //'uploadLimit' : 2,
         'multi'    : false,
-        'cancelImg': 'http://escuela/imagenes/uploadify-cancel.png',
+        'cancelImg': '<?php echo $rutaImgane; ?>/uploadify-cancel.png',
         'formData': {
             'timestamp': '<?php echo $timestamp_excel; ?>',
             'token': '<?php echo md5('unique_salt' . $timestamp_excel); ?>'
         },
-        'swf': 'http://escuela/js/uploadify.swf',
+        'swf': '<?php echo $rutaPublica; ?>js/uploadify.swf',
         'uploader': '<?php echo $this->url(array('controller' => 'Alumnos', 'action' => 'uploadexcel')); ?>',
         'onUploadSuccess': function(file, data, response) {            
             switch (data) {

@@ -1,0 +1,46 @@
+<table width="100%" border="1" cellspacing="3" cellpadding="3" fitColumns="true" id="horario">
+        	<tr>
+        		<th scope="col">HORAS</th>
+        		<th scope="col">LUNES</th>
+        		<th scope="col">MARTES</th>
+        		<th scope="col">MIERCOLES</th>
+        		<th scope="col">JUEVES</th>
+        		<th scope="col">VIERNES</th>
+        	</tr>
+        	<?php 
+            foreach($this->horas as $hora){
+    			$contador=0;
+    			if($hora['hora'] == 'RECREO'){
+    				echo"<tr style='background-color:#6293BB;color:#fff; text-align:center'>
+    						<th colspan='6' scope='row'>RECREO</th>
+    					</tr>";
+    			}else{											
+    				echo"<tr data-idhora='{$hora['id_hora']}' id='hora_{$hora['id_hora']}'><th scope='row'>{$hora['hora']}</th>";							
+    				foreach($this->datos as $dato){								
+    					if($hora['hora'] == $dato['hora']){									
+    						if($dato['materia']!=''){
+    							echo"<td data-dia='{$dato['dia']}' data-idhora='{$hora['id_hora']}'>";
+    							echo "<a href='#' class='assigned-materia easyui-tooltip' data-idprofesor='{$dato['id_profesor']}' data-idmateria='{$dato['id_materia']}' title='Profesor: {$dato['nombre_profesor']}' style='position: static; left: 25px; top: 16px;'>";
+    							echo $dato['materia'];
+    							echo"</a>";
+    							echo"</td>";
+    							$contador++;
+    						}else{
+    							echo"<td data-dia='{$dato['dia']}' data-idhora='{$hora['id_hora']}'>";																				
+    							echo"</td>";
+    							$contador++;
+    						}																
+    					}
+    				}							
+    				$td_faltantes = 5-$contador;							
+    				for($i=$td_faltantes; $i>=1; $i--){								
+    					if($i == 1) echo"<td data-dia='5' data-idhora='{$hora['id_hora']}'></td>";
+    					if($i == 2) echo"<td data-dia='4' data-idhora='{$hora['id_hora']}'></td>";
+    					if($i == 3) echo"<td data-dia='3' data-idhora='{$hora['id_hora']}'></td>";
+    					if($i == 4) echo"<td data-dia='2' data-idhora='{$hora['id_hora']}'></td>";
+    					if($i == 5) echo"<td data-dia='1' data-idhora='{$hora['id_hora']}'></td>";
+    				}
+    			}
+		}
+        	?>
+        </table>

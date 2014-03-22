@@ -1,0 +1,20 @@
+ Grupos: 
+    			<select id="grupos" name="grupos" onchange="cargar_combo('grupos','<?php echo $this->url(array('controller' => 'APG', 'action' => 'cargatabla'));?>','carga_tabla'); disabled">
+    				<option value=''>Selecciona...</option>
+    			<?php							
+                    foreach($this->listaCombo as $grupo){
+                        echo"<option value='";
+                        if(!isset($_GET['idCombo'])){                           
+                            echo $grupo['id_grupo']."'>".$grupo['grupo']."</option>";                           
+                        }
+                        if (isset($_GET['idCombo'])) {
+                        	if($grupo['id_grupo'] == $_GET['idCombo']){
+                        		echo $grupo['id_grupo']."' selected>".$grupo['grupo']."</option>";
+                        	}else{
+                        		echo $grupo['id_grupo']."'>".$grupo['grupo']."</option>";
+                        	}
+                        }
+    				}				
+    			
+    			?>
+    			</select>

@@ -1,96 +1,71 @@
 <?php 
 $rutaImgane = Zend_Registry::get('config')->app->Imagenes;
+$sessionPerfiles = new Zend_Session_Namespace('perfiles');
+$perfil = $sessionPerfiles->perfil;
+
 ?>
 
 <div class="easyui-panel" fit="true" border="false" style="height:100%;overflow:hidden">
     <div class="cart">
-		<div class="ctitle">Gurpo:
-			<select id="grupos" name="grupos" onchange="carga_tabla();">
-				<option value=''>selecciona...</option>;
-			<?php							
-				foreach($this->grupos as $grupo){
-					if($this->grupo == $grupo['id']){
-						echo"<option value='{$grupo['id']}' selected>{$grupo['nombre']}</option>";
-					}
-					echo"<option value='{$grupo['id']}'>{$grupo['nombre']}</option>";
-				}				
-			
-			?>
-			</select>
-		</div>
-        <div class="ctitle">Materias</div>
-        <div style="background:#fff" id="carga_tabla">
-			<table width="1163" border="1" cellspacing="3" cellpadding="3" fitColumns="true" id="horario">
-				<tr>
-					<th scope="col">HORAS</th>
-					<th scope="col">LUNES</th>
-					<th scope="col">MARTES</th>
-					<th scope="col">MIERCOLES</th>
-					<th scope="col">JUEVES</th>
-					<th scope="col">VIERNES</th>
-				</tr>
-				<?php 
-				if($this->validacion == 1){
-					foreach($this->datos as $hora){				
-						if($hora['hora'] == 'RECREO'){
-							echo"<tr style='background-color:#6293BB;color:#fff; text-align:center'>
-									<th colspan='6' scope='row'>RECREO</th>
-								</tr>";
-						}else{
-							echo"<tr data-idhora='{$hora['id_hora']}' id='hora_{$hora['id_hora']}'><th scope='row'>{$hora['hora']}</th>";
-							for($i=0; $i<=5; $i++){
-								if($i == 1) echo"<td data-dia='1' data-idhora='{$hora['id_hora']}' class='drop'></td>";
-								if($i == 2) echo"<td data-dia='2' data-idhora='{$hora['id_hora']}' class='drop'></td>";
-								if($i == 3) echo"<td data-dia='3' data-idhora='{$hora['id_hora']}' class='drop'></td>";
-								if($i == 4) echo"<td data-dia='4' data-idhora='{$hora['id_hora']}' class='drop'></td>";
-								if($i == 5) echo"<td data-dia='5' data-idhora='{$hora['id_hora']}' class='drop'></td>";
-							}
-						}				
-					}
-				}else{					
-					foreach($this->horas as $hora){
-						$contador=0;
-						if($hora['hora'] == 'RECREO'){
-							echo"<tr style='background-color:#6293BB;color:#fff; text-align:center'>
-									<th colspan='6' scope='row'>RECREO</th>
-								</tr>";
-						}else{											
-							echo"<tr data-idhora='{$hora['id_hora']}' id='hora_{$hora['id_hora']}'><th scope='row'>{$hora['hora']}</th>";							
-							foreach($this->datos as $dato){								
-								if($hora['hora'] == $dato['hora']){									
-									if($dato['materia']!=''){
-										echo"<td data-dia='{$dato['dia']}' data-idhora='{$hora['id_hora']}' class='drop droppable ocupado'>";
-										echo "<a href='#' class='drag assigned-materia easyui-tooltip' data-idprofesor='{$dato['id_profesor']}' data-idmateria='{$dato['id_materia']}' title='Profesor: {$dato['nombre_profesor']}' style='position: static; left: 25px; top: 16px;'>";
-										echo $dato['materia'];
-										echo"</a>";
-										echo"</td>";
-										$contador++;
-									}else{
-										echo"<td data-dia='{$dato['dia']}' data-idhora='{$hora['id_hora']}' class='drop'>";																				
-										echo"</td>";
-										$contador++;
-									}																
-								}
-							}							
-							$td_faltantes = 5-$contador;							
-							for($i=$td_faltantes; $i>=1; $i--){								
-								if($i == 1) echo"<td data-dia='5' data-idhora='{$hora['id_hora']}' class='drop'></td>";
-								if($i == 2) echo"<td data-dia='4' data-idhora='{$hora['id_hora']}' class='drop'></td>";
-								if($i == 3) echo"<td data-dia='3' data-idhora='{$hora['id_hora']}' class='drop'></td>";
-								if($i == 4) echo"<td data-dia='2' data-idhora='{$hora['id_hora']}' class='drop'></td>";
-								if($i == 5) echo"<td data-dia='1' data-idhora='{$hora['id_hora']}' class='drop'></td>";
-							}
-						}
-					}
-				}
-				?>
-			</table>
-        </div>
-        <div class="ctitle" id="respuesta" style="position:absolute;bottom:10px">Arrastra aqui la materia</div>
-		<div class="elimina"></div>
-		<div class="botonera">
+         <div class="ctitle"><?php echo 'Profesor: '.Zend_Auth::getInstance()->getIdentity()->S_NOMBRE;?></div>
+        <div class="ctitle">
+            <div class="contenedor-select-profesores" style="<?php if($perfil == 3){ echo"display:block;"; }else{ echo"display:none;";}?>">
+                Profesor 
+                <select id="profesores" name="profesores" onchange="cargar_combo('profesores','<?php echo $this->url(array('controller' => 'APG', 'action' => 'cargacombo'));?>','contenedor-select-grupos');">        			
+        		<option value="">Selecciona...</option>
+        		<?php
+        		    					
+        			foreach($this->listaCombo as $grupo){
+                        echo"<option value='";
+                        if (isset($_GET['idProfesor'])) {                            
+                            if($grupo['id_profesor'] == $_GET['idProfesor']){
+                            	echo $grupo['id_profesor']."' selected>".$grupo['nombre']."</option>";
+                            }else{
+                            	echo $grupo['id_profesor']."'>".$grupo['nombre']."</option>";
+                            }
+                        }else {
+                            echo $grupo['id_profesor']."'>".$grupo['nombre']."</option>";                        	
+                        }                   					
+        				
+        			}
+
+        		
+        		?> 
+        		</select>
+			</div>
+			<div class="contenedor-select-grupos" style="<?php if($perfil == 3 && isset($_GET['idProfesor'])){ echo"display:block;"; }elseif($perfil == 3){ echo"display:none;"; }else{ echo"display:block;";}?>">
+			     Grupos: 
+    			<select id="grupos" name="grupos" onchange="cargar_combo('grupos','','carga_tabla');">    			  				
+    			<?php
+    			    if(!isset($_GET['idCombo'])){ echo"<option values=''>Selecciona..</option>";}   			 
+    				foreach($this->listaCombo as $grupo){
+                        echo"<option value='";
+                        if(!isset($_GET['idCombo'])){                           
+                            echo $grupo['id_grupo']."'>".$grupo['grupo']."</option>";                           
+                        }
+                        if (isset($_GET['idCombo'])) {
+                        	if($grupo['id_grupo'] == $_GET['idCombo']){
+                        		echo $grupo['id_grupo']."' selected>".$grupo['grupo']."</option>";
+                        	}else{
+                        		echo $grupo['id_grupo']."'>".$grupo['grupo']."</option>";
+                        	}
+                        }
+    				}				
+    			
+    			?>
+    			</select>
+    		</div>
+		</div>		
+		<div id="contenedorTabla" style="<?php if ($this->validacion == 1) { echo "display:none;";}else{ echo "display:block";}?>">	
+            <div class="ctitle">Materias</div>
+            <div style="background:#fff" id="carga_tabla">
+    		  <?php echo $this->render('APG/cargatabla.phtml'); ?>
+    		 </div>           
+    		<div class="elimina"></div>
+    		<div class="botonera">
 			<a class="easyui-linkbutton" data-options="iconCls:'icon-ok'" href="javascript:void(0)" onclick="genera_json()">Guardar</a>
 		</div>		
+	   </div>
 	</div>
     <div class="products">
         <?php
@@ -151,21 +126,22 @@ $rutaImgane = Zend_Registry::get('config')->app->Imagenes;
 		padding:10px;
 	}
 	
-	.cart .botonera{margin-top:30px;}
+	.cart .botonera{margin-top:30px; width:150px;}
 	.elimina{
 		position:absolute;
 		width:150px;
 		height:150px;
 		background:url(<?php echo $rutaImgane.'/basura.jpg'?>) no-repeat scroll -133px 0 transparent;
-		top: 328px;
+		top: 401px;
 		left: 622px;
 	}
 	.bote-rojo{
 		background-position:13px 0;
-	}
+	}}
 </style>
 <script>
-$(function(){	
+$(function(){
+    
 	$('#menu_arbol ul').hide();
 	$('#menu_arbol a').click(function(){
 		$(this).next().slideToggle('fast');
@@ -226,25 +202,47 @@ $(function(){
 		}
 	});
 	
-	$('.elimina').droppable({			            
-		onDragEnter:function(e,source){
+	$('.elimina').droppable({
+		accept:aceptadas(),
+		onDragEnter:function(e,source){			
+			//console.log(source);			
 			$(source).draggable('options').cursor='auto';
-			$(this).addClass('bote-rojo');				
+			$(source).draggable('proxy').css('border','1px solid red');
+			$(this).addClass('bote-rojo');
 		},
-		onDragLeave:function(){
+		onDragLeave:function(e,source){
+			//console.log('onDragLeave');
 			$(source).draggable('options').cursor='not-allowed';
+			$(source).draggable('proxy').css('border','1px solid #000');
 			$(this).removeClass('bote-rojo');
 		},
-		onDrop:function(e,source){
-			if ($(source).hasClass('assigned-materia')){
-				$(this).removeClass('bote-rojo');
-				$(source).remove();			
-			}
-		}
+		onDrop:function(e,source){			
+			$(this).removeClass('bote-rojo');			
+			$(this).append(source);
+		}    
+		
 	});
 	
 });
 
+function aceptadas(){
+	var idAceptados ="";
+	$("#horario  tr").each(function(index, value) {
+		var id = $(this).attr('id');	
+		if(typeof id != 'undefined'){
+			  $("tr#"+id+" td").each(function(index,values){
+				  var materiasPermitidas = parseInt($(this).find('a').data('session'));
+				  var materiasTodas =parseInt($(this).find('a').data('idprofesor'));
+				  if(materiasPermitidas == materiasTodas){
+					 idAceptados += "#"+$(this).find('a').attr('id')+",";
+				  }
+				  
+			  });
+		} 
+	});
+	var newStr = idAceptados.substring(0, idAceptados.length-1);
+	return newStr;	
+}
 function checa_disponibilidad(id_profesor, id_grupo, id_hora, dia,elemeto_actual){	
 	$.ajax({
 		url: '<?php echo $this->url(array('controller' => 'APG', 'action' => 'checa'));?>',  
@@ -292,10 +290,38 @@ function showLoadingScreen(mensaje){
         message:  mensaje  
     }); 
 }
-function carga_tabla(){
-	var id_grupo = $('#grupos').val();	
-	var firstPart = "<?php echo $this->url(array('controller' => 'APG', 'action' => 'index'));?>/?grupo=";
-	window.location.href = firstPart + id_grupo;	
+
+function cargar_combo(comboActual,acction,combo_a_cargar){	
+	var idCombo = $('#'+comboActual).val();
+	var idProfesor = $('#profesores').val();	
+	if(comboActual == 'grupos' && idProfesor != ''){		
+		var firstPart = "<?php echo $this->url(array('controller' => 'APG', 'action' => 'index'));?>/?idCombo=";
+		window.location.href = firstPart + idCombo+'&idProfesor='+idProfesor; 
+    }else if(comboActual == 'grupos'){			
+		var firstPart = "<?php echo $this->url(array('controller' => 'APG', 'action' => 'index'));?>/?idCombo=";
+		window.location.href = firstPart + idCombo
+	}else{		
+		$.ajax({
+			url: acction,  
+			async:true,
+			data: 'idCombo='+idCombo,
+			beforeSend: function(objeto){
+				$('.'+combo_a_cargar).text('Cargando....');
+				
+			},
+			success: function(datos) {					
+				$('.'+combo_a_cargar).html(datos);
+				$('.'+combo_a_cargar).css('display','block');
+			},
+			contentType: "application/x-www-form-urlencoded",
+			dataType: "html",
+			error: function(objeto, quepaso, otroobj){
+				$('.'+combo_a_cargar).text('Estas viendo esto por que fallo la peticion y el error es el siguiente '+quepaso,'error');
+			},		
+			timeout: 3000,
+			type: "POST"
+		});
+	}
 }
 function genera_json(){
 	var id_grupo=$('#grupos').val();	

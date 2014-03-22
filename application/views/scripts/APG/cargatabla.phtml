@@ -1,3 +1,4 @@
+<?php $idSession = Zend_Auth::getInstance()->getIdentity()->N_DATOS_PERSONALES;?>
 <table width="1163" border="1" cellspacing="3" cellpadding="3" fitColumns="true" id="horario">
 	<tr>
 		<th scope="col">HORAS</th>
@@ -7,25 +8,62 @@
 		<th scope="col">JUEVES</th>
 		<th scope="col">VIERNES</th>
 	</tr>
-	<?php 
-		foreach($this->horas as $hora){
+	<?php
+	 
+	if($this->validacion == 1){
+		foreach($this->datos as $hora){				
 			if($hora['hora'] == 'RECREO'){
 				echo"<tr style='background-color:#6293BB;color:#fff; text-align:center'>
 						<th colspan='6' scope='row'>RECREO</th>
 					</tr>";
 			}else{
-				echo"<tr data-idhora='{$hora['id_hora']}' id='hora_{$hora['id_hora']}'><th scope='row'>{$hora['hora']}</th>";				
-				foreach($this->datos as $dato){					
-					if($hora['hora'] == $dato['hora']){						
-						echo count($dato['dia']);
-						echo"<td data-dia='{$dato['dia']}' data-idhora='{$hora['id_hora']}' class='drop droppable ocupado'>
-								<a href='#' class='drag assigned-materia' data-idprofesor='{$dato['id_profesor']}' data-idmateria='{$dato['id_materia']}' title='Profesor: {$dato['nombre_profesor']}' style='position: static; left: 25px; top: 16px;'>
-									{$dato['materia']}
-								</a>
-							 </td>";
+				echo"<tr data-idhora='{$hora['id_hora']}' id='hora_{$hora['id_hora']}'><th scope='row'>{$hora['hora']}</th>";
+				for($i=0; $i<=5; $i++){
+					if($i == 1) echo"<td data-dia='1' data-idhora='{$hora['id_hora']}' class='drop'></td>";
+					if($i == 2) echo"<td data-dia='2' data-idhora='{$hora['id_hora']}' class='drop'></td>";
+					if($i == 3) echo"<td data-dia='3' data-idhora='{$hora['id_hora']}' class='drop'></td>";
+					if($i == 4) echo"<td data-dia='4' data-idhora='{$hora['id_hora']}' class='drop'></td>";
+					if($i == 5) echo"<td data-dia='5' data-idhora='{$hora['id_hora']}' class='drop'></td>";
+				}
+			}				
+		}
+	}else{	    				
+		foreach($this->horas as $hora){
+			$contador=0;
+			$contadorTotal = 0;
+			if($hora['hora'] == 'RECREO'){
+				echo"<tr style='background-color:#6293BB;color:#fff; text-align:center'>
+						<th colspan='6' scope='row'>RECREO</th>
+					</tr>";
+			}else{											
+				echo"<tr data-idhora='{$hora['id_hora']}' id='hora_{$hora['id_hora']}'><th scope='row'>{$hora['hora']}</th>";							
+				foreach($this->datos as $dato){								
+					if($hora['hora'] == $dato['hora']){									
+						if($dato['materia']!=''){
+							echo"<td data-dia='{$dato['dia']}' data-idhora='{$hora['id_hora']}' class='drop droppable ocupado'>";
+							echo "<a href='#' id='d$contadorTotal' class='drag assigned-materia easyui-tooltip' data-idprofesor='{$dato['id_profesor']}' data-session='$idSession' data-idmateria='{$dato['id_materia']}' title='Profesor: {$dato['nombre_profesor']}' style='position: static; left: 25px; top: 16px;'>";
+							echo $dato['materia'];
+							echo"</a>";
+							echo"</td>";
+							$contador++;
+						}else{
+							echo"<td data-dia='{$dato['dia']}' data-idhora='{$hora['id_hora']}' class='drop'>";																				
+							echo"</td>";
+							$contador++;
+						}						
 					}
-				}				
+					$contadorTotal++;
+				}							
+				$td_faltantes = 5-$contador;							
+				for($i=$td_faltantes; $i>=1; $i--){								
+					if($i == 1) echo"<td data-dia='5' data-idhora='{$hora['id_hora']}' class='drop'></td>";
+					if($i == 2) echo"<td data-dia='4' data-idhora='{$hora['id_hora']}' class='drop'></td>";
+					if($i == 3) echo"<td data-dia='3' data-idhora='{$hora['id_hora']}' class='drop'></td>";
+					if($i == 4) echo"<td data-dia='2' data-idhora='{$hora['id_hora']}' class='drop'></td>";
+					if($i == 5) echo"<td data-dia='1' data-idhora='{$hora['id_hora']}' class='drop'></td>";
+				}
 			}
 		}
+	}
 	?>
 </table>

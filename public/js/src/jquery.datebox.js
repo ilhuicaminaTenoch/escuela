@@ -21,10 +21,10 @@
 		var state = $.data(target, 'datebox');
 		var opts = state.options;
 		
-		$(target).addClass('datebox-f');
-		$(target).combo($.extend({}, opts, {
+		$(target).addClass('datebox-f').combo($.extend({}, opts, {
 			onShowPanel:function(){
-				state.calendar.calendar('resize');
+				setCalendar();
+				setValue(target, $(target).datebox('getText'));
 				opts.onShowPanel.call(target);
 			}
 		}));
@@ -38,37 +38,55 @@
 		}
 		
 		function createCalendar(){
-			var panel = $(target).combo('panel');
-			state.calendar = $('<div></div>').appendTo(panel).wrap('<div class="datebox-calendar-inner"></div>');
-			state.calendar.calendar({
+			var panel = $(target).combo('panel').css('overflow','hidden');
+			var cc = $('<div class="datebox-calendar-inner"></div>').appendTo(panel);
+			if (opts.sharedCalendar){
+				state.calendar = $(opts.sharedCalendar).appendTo(cc);
+				if (!state.calendar.hasClass('calendar')){
+					state.calendar.calendar();
+				}
+			} else {
+				state.calendar = $('<div></div>').appendTo(cc).calendar();
+			}
+			$.extend(state.calendar.calendar('options'), {
 				fit:true,
 				border:false,
 				onSelect:function(date){
-					var value = opts.formatter(date);
-					setValue(target, value);
-					$(target).combo('hidePanel');
+					var opts = $(this.target).datebox('options');
+					setValue(this.target, opts.formatter(date));
+					$(this.target).combo('hidePanel');
 					opts.onSelect.call(target, date);
 				}
 			});
 			setValue(target, opts.value);
 			
-			var button = $('<div class="datebox-button"></div>').appendTo(panel);
-			$('<a href="javascript:void(0)" class="datebox-current"></a>').html(opts.currentText).appendTo(button);
-			$('<a href="javascript:void(0)" class="datebox-close"></a>').html(opts.closeText).appendTo(button);
-			button.find('.datebox-current,.datebox-close').hover(
-					function(){$(this).addClass('datebox-button-hover');},
-					function(){$(this).removeClass('datebox-button-hover');}
-			);
-			button.find('.datebox-current').click(function(){
-				state.calendar.calendar({
-					year:new Date().getFullYear(),
-					month:new Date().getMonth()+1,
-					current:new Date()
+			var button = $('<div class="datebox-button"><table cellspacing="0" cellpadding="0" style="width:100%"><tr></tr></table></div>').appendTo(panel);
+			var tr = button.find('tr');
+			for(var i=0; i<opts.buttons.length; i++){
+				var td = $('<td></td>').appendTo(tr);
+				var btn = opts.buttons[i];
+				var t = $('<a href="javascript:void(0)"></a>').html($.isFunction(btn.text) ? btn.text(target) : btn.text).appendTo(td);
+				t.bind('click', {target: target, handler: btn.handler}, function(e){
+					e.data.handler.call(this, e.data.target);
 				});
-			});
-			button.find('.datebox-close').click(function(){
-				$(target).combo('hidePanel');
-			});
+			}
+			tr.find('td').css('width', (100/opts.buttons.length)+'%');
+		}
+		
+		function setCalendar(){
+			var panel = $(target).combo('panel');
+			var cc = panel.children('div.datebox-calendar-inner');
+			panel.children()._outerWidth(panel.width());
+			state.calendar.appendTo(cc);
+			state.calendar[0].target = target;
+			if (opts.panelHeight != 'auto'){
+				var height = panel.height();
+				panel.children().not(cc).each(function(){
+					height -= $(this).outerHeight();
+				});
+				cc._outerHeight(height);
+			}
+			state.calendar.calendar('resize');
 		}
 	}
 	
@@ -83,9 +101,9 @@
 	 * called when user press enter key
 	 */
 	function doEnter(target){
-		var opts = $.data(target, 'datebox').options;
-		var c = $.data(target, 'datebox').calendar;
-		var value = opts.formatter(c.calendar('options').current);
+		var state = $.data(target, 'datebox');
+		var opts = state.options;
+		var value = opts.formatter(state.calendar.calendar('options').current);
 		setValue(target, value);
 		$(target).combo('hidePanel');
 	}
@@ -147,25 +165,43 @@
 	};
 	
 	$.fn.datebox.parseOptions = function(target){
-		var t = $(target);
-		return $.extend({}, $.fn.combo.parseOptions(target), {
-		});
+		return $.extend({}, $.fn.combo.parseOptions(target), $.parser.parseOptions(target, ['sharedCalendar']));
 	};
 	
 	$.fn.datebox.defaults = $.extend({}, $.fn.combo.defaults, {
 		panelWidth:180,
 		panelHeight:'auto',
+		sharedCalendar:null,
 		
 		keyHandler: {
-			up:function(){},
-			down:function(){},
-			enter:function(){doEnter(this);},
-			query:function(q){doQuery(this, q);}
+			up:function(e){},
+			down:function(e){},
+			left: function(e){},
+			right: function(e){},
+			enter:function(e){doEnter(this)},
+			query:function(q,e){doQuery(this, q)}
 		},
 		
 		currentText:'Today',
 		closeText:'Close',
 		okText:'Ok',
+		
+		buttons:[{
+			text: function(target){return $(target).datebox('options').currentText;},
+			handler: function(target){
+				$(target).datebox('calendar').calendar({
+					year:new Date().getFullYear(),
+					month:new Date().getMonth()+1,
+					current:new Date()
+				});
+				doEnter(target);
+			}
+		},{
+			text: function(target){return $(target).datebox('options').closeText;},
+			handler: function(target){
+				$(this).closest('div.combo-panel').panel('close');
+			}
+		}],
 		
 		formatter:function(date){
 			var y = date.getFullYear();
